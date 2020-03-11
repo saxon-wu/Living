@@ -16,7 +16,11 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const decode: any = this.validateRequest(request.headers.authorization);
-    request.user = await this.userService.findOneByuuidForUser(decode.id);
+    // request.user是内部使用的，所以findOneByuuidForUser返回UserEntity类型更方便，比如关联存储
+    request.user = await this.userService.findOneByuuidForUser(
+      { uuid: decode.id },
+      true,
+    );
 
     return true;
   }

@@ -8,7 +8,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { LoginDTO } from './auth.dto';
-import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +16,6 @@ export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-    private readonly userService: UserService,
   ) {}
 
   /**

@@ -40,14 +40,27 @@ export class UserService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-11
-   * @param {string} uuid
+   * @param {ParamDTO} paramDTO
+   * @param {boolean} [returnsUserEntity=false]
    * @returns
    * @memberof UserService
    */
-  async findOneByuuidForUser(uuid: string) {
-    const user = await this.userRepository.findOne({ uuid });
+  async findOneByuuidForUser(
+    paramDTO: ParamDTO,
+    returnsUserEntity: boolean = false,
+  ) {
+    const { uuid } = paramDTO;
+    const user = await this.userRepository.findOne(
+      { uuid },
+      {
+        relations: ['articles'],
+      },
+    );
     if (!user) {
       throw new NotFoundException('用户不存在');
+    }
+    if (returnsUserEntity) {
+      return user;
     }
     return user.toResponseObject();
   }
@@ -60,7 +73,9 @@ export class UserService {
    * @memberof UserService
    */
   async findAll() {
-    const users = await this.userRepository.find();
+    const users = await this.userRepository.find({
+      relations: ['articles'],
+    });
     return users.map(v => v.toResponseObject());
   }
 
@@ -68,30 +83,35 @@ export class UserService {
    * @description 查询一条
    * @author Saxon
    * @date 2020-03-11
-   * @param {string} uuid
+   * @param {ParamDTO} paramDTO
    * @returns
    * @memberof UserService
    */
   async findOne(paramDTO: ParamDTO) {
-    const { uuid } = paramDTO;
-    return await this.findOneByuuidForUser(uuid);
+    return await this.findOneByuuidForUser(paramDTO);
   }
 
   /**
    * @description 注销账号
    * @author Saxon
    * @date 2020-03-11
-   * @param {string} uuid
+   * @param {*} user
    * @returns
    * @memberof UserService
    */
   async destroy(user) {
-    const uuid = user.id;
-    await this.findOneByuuidForUser(uuid);
-    const destroyed = await this.userRepository.delete({ uuid });
-    if (!destroyed.affected) {
-      return '注销账号失败';
+    const { uuid } = user;
+    await this.findOneByuuidForUser({ uuid });
+    
+    try {
+      const destroyed = await this.userRepository.delete({ uuid });
+      if (!destroyed.affected) {
+        return '注销账号失败';
+      }
+      return '注销账号成功';
+    } catch (error) {
+      this.logger.error(error)
+      throw new InternalServerErrorException(error.message, '服务器异常');
     }
-    return '注销账号成功';
   }
 }

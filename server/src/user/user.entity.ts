@@ -6,11 +6,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BeforeInsert,
+  OneToMany,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
+import { ArticleEntity } from 'src/article/article.entity';
 
 interface ITokenResponseObject {
   readonly accessToken: string;
@@ -55,28 +57,82 @@ export class UserEntity {
   })
   updatedAt: Date;
 
+  @OneToMany(
+    type => ArticleEntity,
+    article => article.user,
+    { onDelete: 'CASCADE' },
+  )
+  articles: ArticleEntity[];
+
+  /**
+   * @description 插入之前把密码哈希
+   * @author Saxon
+   * @date 2020-03-11
+   * @memberof UserEntity
+   */
   @BeforeInsert()
   hashPassword() {
     this.password = bcrypt.hashSync(this.password, 10);
   }
 
+  /**
+   * @description 比较密码
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {string} password
+   * @returns {boolean}
+   * @memberof UserEntity
+   */
   comparePassword(password: string): boolean {
     return bcrypt.compareSync(password, this.password);
   }
 
+  /**
+   * @description 返回对象
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {boolean} [isAdminSide=false]
+   * @param {boolean} [showToken=false]
+   * @returns
+   * @memberof UserEntity
+   */
   toResponseObject(isAdminSide: boolean = false, showToken: boolean = false) {
-    const { id, uuid, username, createdAt, updatedAt, tokenObject } = this;
-    const client = { id: uuid, username };
-
+    const {
+      id,
+      uuid,
+      username,
+      createdAt,
+      updatedAt,
+      articles,
+      tokenObject,
+    } = this;
+    const common = {
+      username,
+      articles: articles?.map(v => v.toResponseObject()),
+    };
     if (isAdminSide) {
-      return { id, uuid, username, createdAt, updatedAt };
+      return {
+        id,
+        uuid,
+        createdAt,
+        updatedAt,
+        ...common,
+      };
     }
+    const client = { id: uuid, ...common };
     if (showToken) {
       return { ...client, ...tokenObject };
     }
     return client;
   }
 
+  /**
+   * @description 创建token
+   * @readonly
+   * @private
+   * @type {ITokenResponseObject}
+   * @memberof UserEntity
+   */
   private get tokenObject(): ITokenResponseObject {
     const { uuid, username } = this;
     // JWT_EXPIRATION_IN环境变量取到的是字符串，Eg: '60', "2 days", "10h", "7d", 其中字符串中是纯数字必须转成number类型，否则会报token过期

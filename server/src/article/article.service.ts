@@ -5,6 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArticleEntity } from './article.entity';
@@ -12,6 +13,9 @@ import { Repository } from 'typeorm';
 import { CreateArticleDTO } from './article.dto';
 import { validate } from 'class-validator';
 import { ParamDTO } from 'src/shared/shared.dto';
+import { UserService } from 'src/user/user.service';
+import { plainToClass } from 'class-transformer';
+import { UserEntity } from 'src/user/user.entity';
 
 @Injectable()
 export class ArticleService {
@@ -20,6 +24,7 @@ export class ArticleService {
   constructor(
     @InjectRepository(ArticleEntity)
     private readonly articleRepository: Repository<ArticleEntity>,
+    private readonly userService: UserService,
   ) {}
 
   /**
@@ -37,16 +42,27 @@ export class ArticleService {
     }
   }
 
+  ensureOwnership(user, article: ArticleEntity) {
+    if (article.user && user.uuid !== article.user.id) {
+      throw new ForbiddenException('亲，不是您的文章无法操作');
+    }
+  }
   /**
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-11
-   * @param {string} uuid
+   * @param {ParamDTO} paramDTO
    * @returns
    * @memberof ArticleService
    */
-  async findOneByuuidForArticle(uuid: string) {
-    const article = await this.articleRepository.findOne({ uuid });
+  async findOneByuuidForArticle(paramDTO: ParamDTO) {
+    const { uuid } = paramDTO;
+    const article = await this.articleRepository.findOne(
+      { uuid },
+      {
+        relations: ['user'],
+      },
+    );
     if (!article) {
       throw new NotFoundException('文章不存在');
     }
@@ -61,7 +77,9 @@ export class ArticleService {
    * @memberof ArticleService
    */
   async findAll() {
-    const articles = await this.articleRepository.find();
+    const articles = await this.articleRepository.find({
+      relations: ['user'],
+    });
     return articles.map(v => v.toResponseObject());
   }
 
@@ -69,13 +87,12 @@ export class ArticleService {
    * @description 查询一条
    * @author Saxon
    * @date 2020-03-11
-   * @param {string} uuid
+   * @param {ParamDTO} paramDTO
    * @returns
    * @memberof ArticleService
    */
   async findOne(paramDTO: ParamDTO) {
-    const { uuid } = paramDTO;
-    return await this.findOneByuuidForArticle(uuid);
+    return await this.findOneByuuidForArticle(paramDTO);
   }
 
   /**
@@ -83,10 +100,11 @@ export class ArticleService {
    * @author Saxon
    * @date 2020-03-11
    * @param {CreateArticleDTO} articleDTO
+   * @param {*} user
    * @returns
    * @memberof ArticleService
    */
-  async create(articleDTO: CreateArticleDTO) {
+  async create(articleDTO: CreateArticleDTO, user) {
     const created = this.articleRepository.create(articleDTO);
 
     await this.validator(created);
@@ -101,12 +119,14 @@ export class ArticleService {
       );
     }
 
+    created.user = user;
+
     try {
       const saved = await this.articleRepository.save(created);
       return saved.toResponseObject();
     } catch (error) {
-      this.logger.error(error?.message);
-      throw new InternalServerErrorException(error?.message, '服务器异常');
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
     }
   }
 
@@ -114,18 +134,20 @@ export class ArticleService {
    * @description 更新
    * @author Saxon
    * @date 2020-03-11
-   * @param {string} uuid
+   * @param {ParamDTO} paramDTO
    * @param {CreateArticleDTO} articleDTO
    * @returns
    * @memberof ArticleService
    */
-  async update(paramDTO: ParamDTO, articleDTO: CreateArticleDTO) {
+  async update(paramDTO: ParamDTO, articleDTO: CreateArticleDTO, user) {
     const { uuid } = paramDTO;
     const { title, content } = articleDTO;
     if (!title && !content) {
       throw new BadRequestException('亲，参数不可为空');
     }
-    const article = await this.findOneByuuidForArticle(uuid);
+    const article = await this.findOneByuuidForArticle(paramDTO);
+    this.ensureOwnership(user, article);
+
     if (
       (article.title === title && article.content === content) ||
       (!title && article.content === content) ||
@@ -133,28 +155,42 @@ export class ArticleService {
     ) {
       throw new BadRequestException('亲，请修改后再提交');
     }
-    const updated = await this.articleRepository.update({ uuid }, articleDTO);
-    if (!updated.affected) {
-      return '更新失败';
+
+    try {
+      const updated = await this.articleRepository.update({ uuid }, articleDTO);
+      if (!updated.affected) {
+        return '更新失败';
+      }
+      return await this.findOneByuuidForArticle(paramDTO);
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
     }
-    return await this.findOneByuuidForArticle(uuid);
   }
 
   /**
    * @description 删除
    * @author Saxon
    * @date 2020-03-11
-   * @param {string} uuid
+   * @param {ParamDTO} paramDTO
+   * @param {*} user
    * @returns
    * @memberof ArticleService
    */
-  async destroy(paramDTO: ParamDTO) {
+  async destroy(paramDTO: ParamDTO, user) {
     const { uuid } = paramDTO;
-    await this.findOneByuuidForArticle(uuid);
-    const destroyed = await this.articleRepository.delete({ uuid });
-    if (!destroyed.affected) {
-      return '删除失败';
+    const article = await this.findOneByuuidForArticle(paramDTO);
+    this.ensureOwnership(user, article);
+
+    try {
+      const destroyed = await this.articleRepository.delete({ uuid });
+      if (!destroyed.affected) {
+        return '删除失败';
+      }
+      return '删除成功';
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
     }
-    return '删除成功';
   }
 }
