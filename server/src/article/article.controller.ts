@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDTO } from './article.dto';
+import { ParamDTO } from 'src/shared/shared.dto';
 
 @Controller('article')
 export class ArticleController {
@@ -19,9 +20,9 @@ export class ArticleController {
     return await this.articleService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.articleService.findOne(id);
+  @Get(':uuid')
+  async findOne(@Param() paramDTO: ParamDTO) {
+    return await this.articleService.findOne(paramDTO);
   }
 
   @Post()
@@ -29,13 +30,16 @@ export class ArticleController {
     return await this.articleService.create(articleDTO);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() articleDTO: CreateArticleDTO) {
-    return await this.articleService.update(id, articleDTO);
+  @Put(':uuid')
+  async update(
+    @Param() paramDTO: ParamDTO,
+    @Body() articleDTO: CreateArticleDTO,
+  ) {
+    return await this.articleService.update(paramDTO, articleDTO);
   }
 
-  @Delete(':id')
-  async destroy(@Param('id') id: string) {
-    return await this.articleService.destroy(id);
+  @Delete(':uuid')
+  async destroy(@Param() paramDTO: ParamDTO) {
+    return await this.articleService.destroy(paramDTO);
   }
 }

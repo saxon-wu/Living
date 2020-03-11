@@ -11,6 +11,7 @@ import { ArticleEntity } from './article.entity';
 import { Repository } from 'typeorm';
 import { CreateArticleDTO } from './article.dto';
 import { validate } from 'class-validator';
+import { ParamDTO } from 'src/shared/shared.dto';
 
 @Injectable()
 export class ArticleService {
@@ -41,7 +42,7 @@ export class ArticleService {
    * @author Saxon
    * @date 2020-03-11
    * @param {string} uuid
-   * @returns 
+   * @returns
    * @memberof ArticleService
    */
   async findOneByuuidForArticle(uuid: string) {
@@ -56,7 +57,7 @@ export class ArticleService {
    * @description 查询所有
    * @author Saxon
    * @date 2020-03-11
-   * @returns 
+   * @returns
    * @memberof ArticleService
    */
   async findAll() {
@@ -69,10 +70,11 @@ export class ArticleService {
    * @author Saxon
    * @date 2020-03-11
    * @param {string} uuid
-   * @returns 
+   * @returns
    * @memberof ArticleService
    */
-  async findOne(uuid: string) {
+  async findOne(paramDTO: ParamDTO) {
+    const { uuid } = paramDTO;
     return await this.findOneByuuidForArticle(uuid);
   }
 
@@ -81,7 +83,7 @@ export class ArticleService {
    * @author Saxon
    * @date 2020-03-11
    * @param {CreateArticleDTO} articleDTO
-   * @returns 
+   * @returns
    * @memberof ArticleService
    */
   async create(articleDTO: CreateArticleDTO) {
@@ -114,10 +116,11 @@ export class ArticleService {
    * @date 2020-03-11
    * @param {string} uuid
    * @param {CreateArticleDTO} articleDTO
-   * @returns 
+   * @returns
    * @memberof ArticleService
    */
-  async update(uuid: string, articleDTO: CreateArticleDTO) {
+  async update(paramDTO: ParamDTO, articleDTO: CreateArticleDTO) {
+    const { uuid } = paramDTO;
     const { title, content } = articleDTO;
     if (!title && !content) {
       throw new BadRequestException('亲，参数不可为空');
@@ -142,10 +145,11 @@ export class ArticleService {
    * @author Saxon
    * @date 2020-03-11
    * @param {string} uuid
-   * @returns 
+   * @returns
    * @memberof ArticleService
    */
-  async destroy(uuid: string) {
+  async destroy(paramDTO: ParamDTO) {
+    const { uuid } = paramDTO;
     await this.findOneByuuidForArticle(uuid);
     const destroyed = await this.articleRepository.delete({ uuid });
     if (!destroyed.affected) {

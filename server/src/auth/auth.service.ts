@@ -2,7 +2,6 @@ import {
   Injectable,
   Logger,
   ConflictException,
-  NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,6 +20,14 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
+  /**
+   * @description 用户登录
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {LoginDTO} loginDTO
+   * @returns
+   * @memberof AuthService
+   */
   async login(loginDTO: LoginDTO) {
     const { username, password } = loginDTO;
     const user = await this.userRepository.findOne({ username });
@@ -30,6 +37,14 @@ export class AuthService {
     return user.toResponseObject(false, true);
   }
 
+  /**
+   * @description 用户注册
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {LoginDTO} loginDTO
+   * @returns
+   * @memberof AuthService
+   */
   async register(loginDTO: LoginDTO) {
     const { username, password } = loginDTO;
     const user = await this.userRepository.findOne({ username });

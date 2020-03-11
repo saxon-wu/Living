@@ -6,9 +6,13 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDTO } from './user.dto';
 import { UserService } from './user.service';
+import { AuthGuard } from 'src/shared/auth.guard';
+import { User } from 'src/shared/user.decorator';
+import { ParamDTO } from 'src/shared/shared.dto';
 
 @Controller('user')
 export class UserController {
@@ -19,13 +23,14 @@ export class UserController {
     return await this.userService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.userService.findOne(id);
+  @Get(':uuid')
+  async findOne(@Param() paramDTO: ParamDTO) {
+    return await this.userService.findOne(paramDTO);
   }
 
-  @Delete(':id')
-  async destroy(@Param('id') id: string) {
-    return await this.userService.destroy(id);
+  @UseGuards(AuthGuard)
+  @Delete('destruct')
+  async destroy(@User() user) {
+    return await this.userService.destroy(user);
   }
 }

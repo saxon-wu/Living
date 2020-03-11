@@ -3,15 +3,19 @@ import {
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDTO } from './user.dto';
 import { validate } from 'class-validator';
+import { ParamDTO } from 'src/shared/shared.dto';
 
 @Injectable()
 export class UserService {
+  private readonly logger: Logger = new Logger(UserService.name);
+
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
@@ -68,7 +72,8 @@ export class UserService {
    * @returns
    * @memberof UserService
    */
-  async findOne(uuid: string) {
+  async findOne(paramDTO: ParamDTO) {
+    const { uuid } = paramDTO;
     return await this.findOneByuuidForUser(uuid);
   }
 
@@ -80,12 +85,13 @@ export class UserService {
    * @returns
    * @memberof UserService
    */
-  async destroy(uuid: string) {
+  async destroy(user) {
+    const uuid = user.id;
     await this.findOneByuuidForUser(uuid);
     const destroyed = await this.userRepository.delete({ uuid });
     if (!destroyed.affected) {
-      return '删除失败';
+      return '注销账号失败';
     }
-    return '删除成功';
+    return '注销账号成功';
   }
 }
