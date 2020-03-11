@@ -21,12 +21,29 @@ export class ArticleService {
     private readonly articleRepository: Repository<ArticleEntity>,
   ) {}
 
+  /**
+   * @description 验证器，传入的参数与entity中的字段验证比对，比对依据来自entity中的class-validator装饰器
+   * @author Saxon
+   * @date 2020-03-11
+   * @private
+   * @param {ArticleEntity} object
+   * @memberof ArticleService
+   */
   private async validator(object: ArticleEntity) {
     const errors = await validate(object);
     if (errors.length > 0) {
       throw new BadRequestException(errors, '验证失败');
     }
   }
+
+  /**
+   * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {string} uuid
+   * @returns 
+   * @memberof ArticleService
+   */
   async findOneByuuidForArticle(uuid: string) {
     const article = await this.articleRepository.findOne({ uuid });
     if (!article) {
@@ -35,15 +52,38 @@ export class ArticleService {
     return article.toResponseObject();
   }
 
+  /**
+   * @description 查询所有
+   * @author Saxon
+   * @date 2020-03-11
+   * @returns 
+   * @memberof ArticleService
+   */
   async findAll() {
     const articles = await this.articleRepository.find();
     return articles.map(v => v.toResponseObject());
   }
 
+  /**
+   * @description 查询一条
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {string} uuid
+   * @returns 
+   * @memberof ArticleService
+   */
   async findOne(uuid: string) {
     return await this.findOneByuuidForArticle(uuid);
   }
 
+  /**
+   * @description 创建，DTO和Entity双重验证，60秒内防止重复提交
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {CreateArticleDTO} articleDTO
+   * @returns 
+   * @memberof ArticleService
+   */
   async create(articleDTO: CreateArticleDTO) {
     const created = this.articleRepository.create(articleDTO);
 
@@ -68,6 +108,15 @@ export class ArticleService {
     }
   }
 
+  /**
+   * @description 更新
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {string} uuid
+   * @param {CreateArticleDTO} articleDTO
+   * @returns 
+   * @memberof ArticleService
+   */
   async update(uuid: string, articleDTO: CreateArticleDTO) {
     const { title, content } = articleDTO;
     if (!title && !content) {
@@ -88,6 +137,14 @@ export class ArticleService {
     return await this.findOneByuuidForArticle(uuid);
   }
 
+  /**
+   * @description 删除
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {string} uuid
+   * @returns 
+   * @memberof ArticleService
+   */
   async destroy(uuid: string) {
     await this.findOneByuuidForArticle(uuid);
     const destroyed = await this.articleRepository.delete({ uuid });
