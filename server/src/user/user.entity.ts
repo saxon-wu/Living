@@ -7,6 +7,8 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
@@ -57,12 +59,43 @@ export class UserEntity {
   })
   updatedAt: Date;
 
+  /**
+   * @description 用户发布的文章
+   * @type {ArticleEntity[]}
+   * @memberof UserEntity
+   */
   @OneToMany(
     type => ArticleEntity,
-    article => article.user,
-    { onDelete: 'CASCADE' },
+    article => article.publisher,
   )
   articles: ArticleEntity[];
+
+  /**
+   * @description 用户自己收藏哪些文章
+   * @type {ArticleEntity[]}
+   * @memberof UserEntity
+   */
+  @ManyToMany(
+    type => ArticleEntity,
+    user => user.bookmarkUsers,
+    { cascade: true },
+  )
+  @JoinTable({
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'article_id', referencedColumnName: 'id' },
+  })
+  bookmarks: ArticleEntity[];
+
+  /**
+   * @description 用户自己点赞过的文章
+   * @type {ArticleEntity[]}
+   * @memberof UserEntity
+   */
+  @ManyToMany(
+    type => ArticleEntity,
+    user => user.likes,
+  )
+  likeArticles: ArticleEntity[];
 
   /**
    * @description 插入之前把密码哈希
@@ -88,45 +121,6 @@ export class UserEntity {
   }
 
   /**
-   * @description 返回对象
-   * @author Saxon
-   * @date 2020-03-11
-   * @param {boolean} [isAdminSide=false]
-   * @param {boolean} [showToken=false]
-   * @returns
-   * @memberof UserEntity
-   */
-  toResponseObject(isAdminSide: boolean = false, showToken: boolean = false) {
-    const {
-      id,
-      uuid,
-      username,
-      createdAt,
-      updatedAt,
-      articles,
-      tokenObject,
-    } = this;
-    const common = {
-      username,
-      articles: articles?.map(v => v.toResponseObject()),
-    };
-    if (isAdminSide) {
-      return {
-        id,
-        uuid,
-        createdAt,
-        updatedAt,
-        ...common,
-      };
-    }
-    const client = { id: uuid, ...common };
-    if (showToken) {
-      return { ...client, ...tokenObject };
-    }
-    return client;
-  }
-
-  /**
    * @description 创建token
    * @readonly
    * @private
@@ -149,5 +143,51 @@ export class UserEntity {
       },
     );
     return { accessToken, expiresIn };
+  }
+
+  /**
+   * @description 返回对象
+   * @author Saxon
+   * @date 2020-03-11
+   * @param {boolean} [isAdminSide=false]
+   * @param {boolean} [showToken=false]
+   * @returns
+   * @memberof UserEntity
+   */
+  toResponseObject(isAdminSide: boolean = false, showToken: boolean = false) {
+    const {
+      id,
+      uuid,
+      username,
+      createdAt,
+      updatedAt,
+      articles,
+      bookmarks,
+      likeArticles,
+      tokenObject,
+    } = this;
+    const common = {
+      username,
+      bookmarks: bookmarks?.map(v => v.toResponseObject()),
+      bookmarksTotal: bookmarks?.length,
+      articles: articles?.map(v => v.toResponseObject()),
+      articlesTotal: articles?.length,
+      likeArticles: likeArticles?.map(v => v.toResponseObject()),
+      likeArticlesTotal: likeArticles?.length,
+    };
+    if (isAdminSide) {
+      return {
+        id,
+        uuid,
+        createdAt,
+        updatedAt,
+        ...common,
+      };
+    }
+    const client = { id: uuid, ...common };
+    if (showToken) {
+      return { ...client, ...tokenObject };
+    }
+    return client;
   }
 }

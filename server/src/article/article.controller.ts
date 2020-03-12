@@ -50,4 +50,16 @@ export class ArticleController {
   async destroy(@Param() paramDTO: ParamDTO, @User() user) {
     return await this.articleService.destroy(paramDTO, user);
   }
+
+  @UseGuards(AuthGuard)
+  @Post(':uuid/like')
+  async like(@Param() paramDTO: ParamDTO, @User() user) {
+    return await this.articleService.like(paramDTO, user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post(':uuid/bookmark')
+  async bookmark(@Param() paramDTO: ParamDTO, @User() user) {
+    return await this.articleService.bookmark(paramDTO, user);
+  }
 }

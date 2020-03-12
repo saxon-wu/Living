@@ -6,6 +6,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  ManyToMany,
+  JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { UserEntity } from 'src/user/user.entity';
@@ -41,12 +44,47 @@ export class ArticleEntity {
   })
   updateAt: Date;
 
+  /**
+   * @description 该文章的发布者
+   * @type {UserEntity}
+   * @memberof ArticleEntity
+   */
   @ManyToOne(
     tyep => UserEntity,
-    user => user.articles,
+    publisher => publisher.articles,
     { onDelete: 'CASCADE' },
   )
-  user: UserEntity;
+  @JoinColumn({
+    name: 'user_id',
+  })
+  publisher: UserEntity;
+
+  /**
+   * @description 文章拥有哪些用户的点赞
+   * @type {UserEntity[]}
+   * @memberof ArticleEntity
+   */
+  @ManyToMany(
+    type => UserEntity,
+    article => article.likeArticles,
+    { cascade: true },
+  )
+  @JoinTable({
+    joinColumn: { name: 'article_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
+  likes: UserEntity[];
+
+  /**
+   * @description 文章被哪些用户收藏
+   * @type {UserEntity[]}
+   * @memberof ArticleEntity
+   */
+  @ManyToMany(
+    type => UserEntity,
+    article => article.bookmarks,
+  )
+  bookmarkUsers: UserEntity[];
 
   /**
    * @description 返回对象
@@ -57,8 +95,26 @@ export class ArticleEntity {
    * @memberof ArticleEntity
    */
   toResponseObject(isAdminSide: boolean = false) {
-    const { id, uuid, title, content, createdAt, updateAt, user } = this;
-    const common = { title, content, user: user?.toResponseObject() || null };
+    const {
+      id,
+      uuid,
+      title,
+      content,
+      createdAt,
+      updateAt,
+      publisher,
+      likes,
+      bookmarkUsers,
+    } = this;
+    const common = {
+      title,
+      content,
+      publisher: publisher?.toResponseObject(),
+      likes: likes?.map(v => v.toResponseObject()),
+      likesTotal: likes?.length,
+      bookmarkUsers: bookmarkUsers?.map(v => v.toResponseObject()),
+      bookmarkUsersTotal: bookmarkUsers?.length,
+    };
     if (isAdminSide) {
       return {
         id,

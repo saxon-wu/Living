@@ -8,13 +8,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDTO } from './user.dto';
 import { validate } from 'class-validator';
 import { ParamDTO } from 'src/shared/shared.dto';
 
 @Injectable()
 export class UserService {
   private readonly logger: Logger = new Logger(UserService.name);
+  private readonly relations = ['articles', 'bookmarks', 'likeArticles'];
 
   constructor(
     @InjectRepository(UserEntity)
@@ -53,7 +53,7 @@ export class UserService {
     const user = await this.userRepository.findOne(
       { uuid },
       {
-        relations: ['articles'],
+        relations: this.relations,
       },
     );
     if (!user) {
@@ -74,7 +74,7 @@ export class UserService {
    */
   async findAll() {
     const users = await this.userRepository.find({
-      relations: ['articles'],
+      relations: this.relations,
     });
     return users.map(v => v.toResponseObject());
   }
@@ -102,7 +102,7 @@ export class UserService {
   async destroy(user) {
     const { uuid } = user;
     await this.findOneByuuidForUser({ uuid });
-    
+
     try {
       const destroyed = await this.userRepository.delete({ uuid });
       if (!destroyed.affected) {
@@ -110,8 +110,20 @@ export class UserService {
       }
       return '注销账号成功';
     } catch (error) {
-      this.logger.error(error)
+      this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
     }
+  }
+
+  /**
+   * @description 给article服务层调用
+   * @author Saxon
+   * @date 2020-03-12
+   * @param {*} user
+   * @returns
+   * @memberof UserService
+   */
+  async bookmark(user) {
+    return await this.userRepository.save(user);
   }
 }
