@@ -172,7 +172,7 @@ describe('测试完整流程', () => {
       const randomReplyLength = randomComment.replies.length;
       if (!randomReplyLength) {
         console.error('同一评论没有可以回复的目标');
-        done();
+        return done();
       }
       const randomReply = randomComment.replies[random(randomReplyLength)];
       const content = faker.lorem.lines();
@@ -197,7 +197,7 @@ describe('测试完整流程', () => {
       const randomReplyLength = randomComment.replies.length;
       if (!randomReplyLength) {
         console.error('同一评论没有可以回复的点赞目标');
-        done();
+        return done();
       }
       const randomReply = randomComment.replies[random(randomReplyLength)];
       const response = await request(server)
@@ -208,5 +208,9 @@ describe('测试完整流程', () => {
       expect(reply).toHaveProperty('content');
       done();
     });
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 });

@@ -1,49 +1,23 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
-  Generated,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   ManyToMany,
   JoinTable,
   OneToMany,
   JoinColumn,
-  DeleteDateColumn,
 } from 'typeorm';
 import { UserEntity } from '@src/user/user.entity';
 import { ArticleEntity } from '@src/article/article.entity';
 import { ReplyEntity } from '@src/reply/reply.entity';
+import { SharedEntity } from '@src/shared/shared.entity';
 
 @Entity('comment')
-export class CommentEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Generated('uuid')
-  @Column()
-  uuid: string;
-
+export class CommentEntity extends SharedEntity {
   @Column({
     type: 'text',
   })
   content: string;
-
-  @CreateDateColumn({
-    name: 'created_at',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-  })
-  updateAt: Date;
-
-  @DeleteDateColumn({
-    name: 'deleted_at',
-  })
-  deletedAt: Date;
 
   /**
    * @description 评论者
@@ -113,7 +87,7 @@ export class CommentEntity {
       uuid,
       content,
       createdAt,
-      updateAt,
+      updatedAt,
       commenter,
       likes,
       replies,
@@ -131,7 +105,7 @@ export class CommentEntity {
         id,
         uuid,
         createdAt,
-        updateAt,
+        updatedAt,
         ...common,
       };
     }

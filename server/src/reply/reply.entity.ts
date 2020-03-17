@@ -1,47 +1,21 @@
 import {
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
-  Generated,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToMany,
   JoinTable,
   JoinColumn,
-  DeleteDateColumn,
 } from 'typeorm';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { UserEntity } from '@src/user/user.entity';
+import { SharedEntity } from '@src/shared/shared.entity';
 
 @Entity('reply')
-export class ReplyEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Generated('uuid')
-  @Column()
-  uuid: string;
-
+export class ReplyEntity extends SharedEntity {
   @Column({
     type: 'text',
   })
   content: string;
-
-  @CreateDateColumn({
-    name: 'created_at',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-  })
-  updateAt: Date;
-
-  @DeleteDateColumn({
-    name: 'deleted_at',
-  })
-  deletedAt: Date;
 
   /**
    * @description 回复者
@@ -106,7 +80,7 @@ export class ReplyEntity {
    * @memberof ReplyEntity
    */
   toResponseObject(isAdminSide: boolean = false) {
-    const { id, uuid, createdAt, updateAt, replier, likes, content } = this;
+    const { id, uuid, createdAt, updatedAt, replier, likes, content } = this;
     const common = {
       content,
       replier: replier?.toResponseObject() || null,
@@ -118,7 +92,7 @@ export class ReplyEntity {
         id,
         uuid,
         createdAt,
-        updateAt,
+        updatedAt,
         ...common,
       };
     }

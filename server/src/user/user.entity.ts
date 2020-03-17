@@ -1,15 +1,10 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
-  Generated,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   BeforeInsert,
   OneToMany,
   ManyToMany,
   JoinTable,
-  DeleteDateColumn,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
@@ -17,6 +12,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { ArticleEntity } from '@src/article/article.entity';
 import { CommentEntity } from '@src/comment/comment.entity';
+import { SharedEntity } from '@src/shared/shared.entity';
 
 interface ITokenResponseObject {
   readonly accessToken: string;
@@ -24,17 +20,11 @@ interface ITokenResponseObject {
 }
 
 @Entity('user')
-export class UserEntity {
+export class UserEntity extends SharedEntity {
   constructor(partial: Partial<UserEntity>) {
+    super();
     Object.assign(this, partial);
   }
-
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Generated('uuid')
-  @Column()
-  uuid: string;
 
   @IsNotEmpty()
   @IsString()
@@ -50,21 +40,6 @@ export class UserEntity {
     nullable: true,
   })
   password: string;
-
-  @CreateDateColumn({
-    name: 'created_at',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-  })
-  updatedAt: Date;
-
-  @DeleteDateColumn({
-    name: 'deleted_at',
-  })
-  deletedAt: Date;
 
   /**
    * @description 用户发布的文章

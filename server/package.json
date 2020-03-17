@@ -28,6 +28,7 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.11.0",
+    "dayjs": "^1.8.23",
     "jsonwebtoken": "^8.5.1",
     "pg": "^7.18.2",
     "reflect-metadata": "^0.1.13",

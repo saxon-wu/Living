@@ -1,30 +1,19 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
-  Generated,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   ManyToMany,
   JoinColumn,
   JoinTable,
   OneToMany,
-  DeleteDateColumn,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { UserEntity } from '@src/user/user.entity';
 import { CommentEntity } from '@src/comment/comment.entity';
+import { SharedEntity } from '@src/shared/shared.entity';
 
 @Entity('article')
-export class ArticleEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Generated('uuid')
-  @Column()
-  uuid: string;
-
+export class ArticleEntity extends SharedEntity {
   @IsNotEmpty()
   @IsString()
   @Column()
@@ -36,21 +25,6 @@ export class ArticleEntity {
     type: 'text',
   })
   content: string;
-
-  @CreateDateColumn({
-    name: 'created_at',
-  })
-  createdAt: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-  })
-  updateAt: Date;
-
-  @DeleteDateColumn({
-    name: 'deleted_at',
-  })
-  deletedAt: Date;
 
   /**
    * @description 发布者
@@ -118,7 +92,7 @@ export class ArticleEntity {
       title,
       content,
       createdAt,
-      updateAt,
+      updatedAt,
       publisher,
       likes,
       bookmarkUsers,
@@ -137,7 +111,7 @@ export class ArticleEntity {
         id,
         uuid,
         createdAt,
-        updateAt,
+        updatedAt,
         ...common,
       };
     }
