@@ -9,12 +9,14 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  DeleteDateColumn,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { ArticleEntity } from 'src/article/article.entity';
+import { ArticleEntity } from '@src/article/article.entity';
+import { CommentEntity } from '@src/comment/comment.entity';
 
 interface ITokenResponseObject {
   readonly accessToken: string;
@@ -59,6 +61,11 @@ export class UserEntity {
   })
   updatedAt: Date;
 
+  @DeleteDateColumn({
+    name: 'deleted_at',
+  })
+  deletedAt: Date;
+
   /**
    * @description 用户发布的文章
    * @type {ArticleEntity[]}
@@ -71,14 +78,13 @@ export class UserEntity {
   articles: ArticleEntity[];
 
   /**
-   * @description 用户自己收藏哪些文章
+   * @description 用户拥有收藏的(文章)
    * @type {ArticleEntity[]}
    * @memberof UserEntity
    */
   @ManyToMany(
     type => ArticleEntity,
-    user => user.bookmarkUsers,
-    { cascade: true },
+    article => article.bookmarkUsers,
   )
   @JoinTable({
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
@@ -87,15 +93,37 @@ export class UserEntity {
   bookmarks: ArticleEntity[];
 
   /**
-   * @description 用户自己点赞过的文章
+   * @description 用户属于点赞的(文章)
    * @type {ArticleEntity[]}
    * @memberof UserEntity
    */
   @ManyToMany(
     type => ArticleEntity,
-    user => user.likes,
+    article => article.likes,
   )
   likeArticles: ArticleEntity[];
+
+  /**
+   * @description 用户发表的评论
+   * @type {CommentEntity[]}
+   * @memberof UserEntity
+   */
+  @OneToMany(
+    type => CommentEntity,
+    comment => comment.commenter,
+  )
+  comments: CommentEntity[];
+
+  /**
+   * @description 用户属于点赞的(评论)
+   * @type {ArticleEntity[]}
+   * @memberof UserEntity
+   */
+  @ManyToMany(
+    type => ArticleEntity,
+    comment => comment.likes,
+  )
+  likeComments: ArticleEntity[];
 
   /**
    * @description 插入之前把密码哈希
@@ -117,7 +145,7 @@ export class UserEntity {
    * @memberof UserEntity
    */
   comparePassword(password: string): boolean {
-    return bcrypt.compareSync(password, this.password);
+    return this.password ? bcrypt.compareSync(password, this.password) : false;
   }
 
   /**
@@ -169,11 +197,11 @@ export class UserEntity {
     const common = {
       username,
       bookmarks: bookmarks?.map(v => v.toResponseObject()),
-      bookmarksTotal: bookmarks?.length,
+      bookmarksCount: bookmarks?.length,
       articles: articles?.map(v => v.toResponseObject()),
-      articlesTotal: articles?.length,
+      articlesCount: articles?.length,
       likeArticles: likeArticles?.map(v => v.toResponseObject()),
-      likeArticlesTotal: likeArticles?.length,
+      likeArticlesCount: likeArticles?.length,
     };
     if (isAdminSide) {
       return {

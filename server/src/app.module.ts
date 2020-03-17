@@ -6,10 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { CommentModule } from './comment/comment.module';
+import { ReplyModule } from './reply/reply.module';
 
 @Module({
   imports: [
-    ArticleModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -28,8 +29,11 @@ import { AuthModule } from './auth/auth.module';
       envFilePath: `.development.env`,
       isGlobal: true
     }),
+    ArticleModule,
     UserModule,
     AuthModule,
+    CommentModule,
+    ReplyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

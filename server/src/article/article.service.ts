@@ -12,8 +12,10 @@ import { ArticleEntity } from './article.entity';
 import { Repository } from 'typeorm';
 import { CreateArticleDTO } from './article.dto';
 import { validate } from 'class-validator';
-import { ParamDTO } from 'src/shared/shared.dto';
-import { UserService } from 'src/user/user.service';
+import { ParamDTO } from '@src/shared/shared.dto';
+import { UserService } from '@src/user/user.service';
+import { UserEntity } from '@src/user/user.entity';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class ArticleService {
@@ -34,15 +36,23 @@ export class ArticleService {
    * @param {ArticleEntity} object
    * @memberof ArticleService
    */
-  private async validator(object: ArticleEntity) {
+  private async validator(object: ArticleEntity): Promise<void> {
     const errors = await validate(object);
     if (errors.length > 0) {
       throw new BadRequestException(errors, '验证失败');
     }
   }
 
-  ensureOwnership(user, article: ArticleEntity) {
-    if (article.publisher && article.publisher.id !== user.uuid) {
+  /**
+   * @description 确保所有权
+   * @author Saxon
+   * @date 2020-03-15
+   * @param {*} user
+   * @param {ArticleEntity} article
+   * @memberof ArticleService
+   */
+  ensureOwnership(user: UserEntity, article: ArticleEntity): void {
+    if (article.publisher && (article.publisher.id as any) !== user.uuid) {
       throw new ForbiddenException('亲，不是您的文章无法操作');
     }
   }
@@ -51,16 +61,16 @@ export class ArticleService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-12
-   * @param {ParamDTO} paramDTO
+   * @param {ParamDTO} articleParamDTO
    * @param {boolean} [returnsUserEntity=false]
    * @returns
    * @memberof ArticleService
    */
   async findOneByuuidForArticle(
-    paramDTO: ParamDTO,
+    articleParamDTO: ParamDTO,
     returnsUserEntity: boolean = false,
   ) {
-    const { uuid } = paramDTO;
+    const { uuid } = articleParamDTO;
     const article = await this.articleRepository.findOne(
       { uuid },
       {
@@ -94,28 +104,24 @@ export class ArticleService {
    * @description 查询一条
    * @author Saxon
    * @date 2020-03-11
-   * @param {ParamDTO} paramDTO
+   * @param {ParamDTO} articleParamDTO
    * @returns
    * @memberof ArticleService
    */
-  async findOne(paramDTO: ParamDTO) {
-    return await this.findOneByuuidForArticle(paramDTO);
+  async findOne(articleParamDTO: ParamDTO) {
+    return await this.findOneByuuidForArticle(articleParamDTO);
   }
 
   /**
    * @description 创建，DTO和Entity双重验证，60秒内防止重复提交
    * @author Saxon
-   * @date 2020-03-11
+   * @date 2020-03-15
    * @param {CreateArticleDTO} articleDTO
-   * @param {*} user
+   * @param {UserEntity} user
    * @returns
    * @memberof ArticleService
    */
-  async create(articleDTO: CreateArticleDTO, user) {
-    const created = this.articleRepository.create(articleDTO);
-
-    await this.validator(created);
-
+  async create(articleDTO: CreateArticleDTO, user: UserEntity) {
     const { title, content } = articleDTO;
     const article = await this.articleRepository.findOne({ title });
 
@@ -125,12 +131,13 @@ export class ArticleService {
         '亲，系统阻止了，请确认是否重复提交，1分钟后可再次提交',
       );
     }
+    const creatingArticle = this.articleRepository.create(articleDTO);
 
-    created.publisher = user;
+    creatingArticle.publisher = user;
 
     try {
-      const saved = await this.articleRepository.save(created);
-      return saved.toResponseObject();
+      const savingArticle = await this.articleRepository.save(creatingArticle);
+      return savingArticle.toResponseObject();
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -140,19 +147,24 @@ export class ArticleService {
   /**
    * @description 更新
    * @author Saxon
-   * @date 2020-03-11
-   * @param {ParamDTO} paramDTO
+   * @date 2020-03-15
+   * @param {ParamDTO} articleParamDTO
    * @param {CreateArticleDTO} articleDTO
+   * @param {UserEntity} user
    * @returns
    * @memberof ArticleService
    */
-  async update(paramDTO: ParamDTO, articleDTO: CreateArticleDTO, user) {
-    const { uuid } = paramDTO;
+  async update(
+    articleParamDTO: ParamDTO,
+    articleDTO: CreateArticleDTO,
+    user: UserEntity,
+  ) {
+    const { uuid } = articleParamDTO;
     const { title, content } = articleDTO;
     if (!title && !content) {
       throw new BadRequestException('亲，参数不可为空');
     }
-    const article = await this.findOneByuuidForArticle(paramDTO);
+    const article = await this.findOneByuuidForArticle(articleParamDTO);
     this.ensureOwnership(user, article);
 
     if (
@@ -164,11 +176,14 @@ export class ArticleService {
     }
 
     try {
-      const updated = await this.articleRepository.update({ uuid }, articleDTO);
-      if (!updated.affected) {
+      const updatingAticle = await this.articleRepository.update(
+        { uuid },
+        articleDTO,
+      );
+      if (!updatingAticle.affected) {
         return '更新失败';
       }
-      return await this.findOneByuuidForArticle(paramDTO);
+      return await this.findOneByuuidForArticle(articleParamDTO);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -176,22 +191,25 @@ export class ArticleService {
   }
 
   /**
-   * @description 删除
+   * @description 软删除
    * @author Saxon
-   * @date 2020-03-11
-   * @param {ParamDTO} paramDTO
-   * @param {*} user
+   * @date 2020-03-15
+   * @param {ParamDTO} articleParamDTO
+   * @param {UserEntity} user
    * @returns
    * @memberof ArticleService
    */
-  async destroy(paramDTO: ParamDTO, user) {
-    const { uuid } = paramDTO;
-    const article = await this.findOneByuuidForArticle(paramDTO);
+  async softDelete(articleParamDTO: ParamDTO, user: UserEntity) {
+    const { uuid } = articleParamDTO;
+    const article = await this.findOneByuuidForArticle(articleParamDTO);
     this.ensureOwnership(user, article);
 
     try {
-      const destroyed = await this.articleRepository.delete({ uuid });
-      if (!destroyed.affected) {
+      // 不检查数据库中是否存在实体
+      const softDeletingAticle = await this.articleRepository.softDelete({
+        uuid,
+      });
+      if (!softDeletingAticle.affected) {
         return '删除失败';
       }
       return '删除成功';
@@ -202,16 +220,42 @@ export class ArticleService {
   }
 
   /**
-   * @description 点赞
+   * @description 恢复软删除的数据
    * @author Saxon
-   * @date 2020-03-12
-   * @param {ParamDTO} paramDTO
-   * @param {*} user
+   * @date 2020-03-16
+   * @param {ParamDTO} articleParamDTO
    * @returns
    * @memberof ArticleService
    */
-  async like(paramDTO: ParamDTO, user) {
-    const { uuid } = paramDTO;
+  async softRestore(articleParamDTO: ParamDTO, user: UserEntity) {
+    const { uuid } = articleParamDTO;
+
+    try {
+      // 不检查数据库中是否存在实体
+      const softRestoringArticle = await this.articleRepository.restore({
+        uuid,
+      });
+      if (!softRestoringArticle.affected) {
+        return '恢复失败';
+      }
+      return '恢复成功';
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
+    }
+  }
+
+  /**
+   * @description 点赞
+   * @author Saxon
+   * @date 2020-03-15
+   * @param {ParamDTO} articleParamDTO
+   * @param {UserEntity} user
+   * @returns
+   * @memberof ArticleService
+   */
+  async like(articleParamDTO: ParamDTO, user: UserEntity) {
+    const { uuid } = articleParamDTO;
     const article = await this.findOneByuuidForArticle({ uuid }, true);
     // 本用户对该文章的点赞数
     const likeOfCurrentUser: number = article.likes.filter(
@@ -225,16 +269,25 @@ export class ArticleService {
     }
 
     try {
-      const saved = await this.articleRepository.save(article);
-      return saved.toResponseObject();
+      const savingArticle = await this.articleRepository.save(article);
+      return savingArticle.toResponseObject();
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
     }
   }
 
-  async bookmark(paramDTO: ParamDTO, user) {
-    const { uuid } = paramDTO;
+  /**
+   * @description 收藏
+   * @author Saxon
+   * @date 2020-03-15
+   * @param {ParamDTO} articleParamDTO
+   * @param {UserEntity} user
+   * @returns
+   * @memberof ArticleService
+   */
+  async bookmark(articleParamDTO: ParamDTO, user: UserEntity) {
+    const { uuid } = articleParamDTO;
     const article = await this.findOneByuuidForArticle({ uuid }, true);
     if (article.user?.id === user.id) {
       throw new ForbiddenException('亲，这是您的文章嘢');
@@ -251,8 +304,8 @@ export class ArticleService {
     }
 
     try {
-      const saved = await this.userService.bookmark(user);
-      return saved.toResponseObject();
+      const savingBookmarkByUser = await this.userService.bookmark(user);
+      return savingBookmarkByUser.toResponseObject();
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');

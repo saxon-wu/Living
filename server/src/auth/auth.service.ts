@@ -3,9 +3,10 @@ import {
   Logger,
   ConflictException,
   ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/user/user.entity';
+import { UserEntity } from '@src/user/user.entity';
 import { Repository } from 'typeorm';
 import { LoginDTO } from './auth.dto';
 
@@ -50,9 +51,18 @@ export class AuthService {
       throw new ConflictException('亲，用户已存在');
     }
 
-    const created = this.userRepository.create(loginDTO);
-    const saved = await this.userRepository.save(created);
+    const creatingUser = this.userRepository.create(loginDTO);
 
-    return saved.toResponseObject(false, true);
+    try {
+      const savingUser = await this.userRepository.save(creatingUser);
+
+      return savingUser.toResponseObject(
+        /* isAdminSide */ false,
+        /* showToken */ true,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
+    }
   }
 }

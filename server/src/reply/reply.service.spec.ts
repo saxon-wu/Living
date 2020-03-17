@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { ReplyService } from './reply.service';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '@src/app.module';
 
-describe('UserService', () => {
-  let service: UserService;
+describe('ReplyService', () => {
+  let service: ReplyService;
   let articleUUID: string;
   let app: INestApplication;
 
@@ -13,7 +13,7 @@ describe('UserService', () => {
       imports: [AppModule],
     }).compile();
 
-    service = module.get<UserService>(UserService);
+    service = module.get<ReplyService>(ReplyService);
   });
 
   it('should be defined', () => {

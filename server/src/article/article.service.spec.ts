@@ -1,12 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ArticleService } from './article.service';
+import { INestApplication } from '@nestjs/common';
+import { AppModule } from '@src/app.module';
 
 describe('ArticleService', () => {
   let service: ArticleService;
+  let articleUUID: string;
+  let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ArticleService],
+      imports: [AppModule],
     }).compile();
 
     service = module.get<ArticleService>(ArticleService);

@@ -4,9 +4,8 @@ import {
   Injectable,
   ForbiddenException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '@src/user/user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

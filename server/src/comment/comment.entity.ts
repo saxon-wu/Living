@@ -7,17 +7,17 @@ import {
   UpdateDateColumn,
   ManyToOne,
   ManyToMany,
-  JoinColumn,
   JoinTable,
   OneToMany,
+  JoinColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { IsNotEmpty, IsString } from 'class-validator';
 import { UserEntity } from '@src/user/user.entity';
-import { CommentEntity } from '@src/comment/comment.entity';
+import { ArticleEntity } from '@src/article/article.entity';
+import { ReplyEntity } from '@src/reply/reply.entity';
 
-@Entity('article')
-export class ArticleEntity {
+@Entity('comment')
+export class CommentEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -25,13 +25,6 @@ export class ArticleEntity {
   @Column()
   uuid: string;
 
-  @IsNotEmpty()
-  @IsString()
-  @Column()
-  title: string;
-
-  @IsNotEmpty()
-  @IsString()
   @Column({
     type: 'text',
   })
@@ -53,84 +46,85 @@ export class ArticleEntity {
   deletedAt: Date;
 
   /**
-   * @description 发布者
+   * @description 评论者
    * @type {UserEntity}
-   * @memberof ArticleEntity
+   * @memberof CommentEntity
    */
   @ManyToOne(
-    tyep => UserEntity,
-    user => user.articles,
+    type => UserEntity,
+    user => user.comments,
   )
   @JoinColumn({
     name: 'user_id',
   })
-  publisher: UserEntity;
+  commenter: UserEntity;
 
   /**
-   * @description 文章拥有用户的(点赞)
+   * @description 评论所属的文章
+   * @type {ArticleEntity}
+   * @memberof CommentEntity
+   */
+  @ManyToOne(
+    type => ArticleEntity,
+    article => article.comments,
+  )
+  @JoinColumn({
+    name: 'article_id',
+  })
+  article: ArticleEntity;
+
+  /**
+   * @description 评论拥有用户的(点赞)
    * @type {UserEntity[]}
-   * @memberof ArticleEntity
+   * @memberof CommentEntity
    */
   @ManyToMany(
     type => UserEntity,
-    user => user.likeArticles,
+    user => user.likeComments,
   )
   @JoinTable({
-    joinColumn: { name: 'article_id', referencedColumnName: 'id' },
+    joinColumn: { name: 'comment_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
   })
   likes: UserEntity[];
 
   /**
-   * @description 文章属于用户(收藏)
-   * @type {UserEntity[]}
-   * @memberof ArticleEntity
-   */
-  @ManyToMany(
-    type => UserEntity,
-    user => user.bookmarks,
-  )
-  bookmarkUsers: UserEntity[];
-
-  /**
-   * @description 文章的评论
-   * @type {CommentEntity[]}
-   * @memberof ArticleEntity
+   * @description 回复的”回复“
+   * @type {ReplyEntity[]}
+   * @memberof CommentEntity
    */
   @OneToMany(
-    type => CommentEntity,
-    comment => comment.article,
+    type => ReplyEntity,
+    reply => reply.comment,
   )
-  comments: CommentEntity[];
+  replies: ReplyEntity[];
 
   /**
    * @description 返回对象
    * @author Saxon
-   * @date 2020-03-11
+   * @date 2020-03-13
    * @param {boolean} [isAdminSide=false]
    * @returns
-   * @memberof ArticleEntity
+   * @memberof CommentEntity
    */
   toResponseObject(isAdminSide: boolean = false) {
     const {
       id,
       uuid,
-      title,
       content,
       createdAt,
       updateAt,
-      publisher,
+      commenter,
       likes,
-      bookmarkUsers,
+      replies,
     } = this;
     const common = {
-      title,
       content,
-      publisher: publisher?.toResponseObject() || null,
+      commenter: commenter?.toResponseObject() || null,
       likes: likes?.map(v => v.toResponseObject()) || null,
       likesCount: likes?.length || 0,
-      bookmarkUsers: bookmarkUsers?.map(v => v.toResponseObject()) || null,
-      bookmarkUsersCount: bookmarkUsers?.length || 0,
+      replies: replies?.map(v => v.toResponseObject()) || null,
+      repliesCount: replies?.length || 0,
     };
     if (isAdminSide) {
       return {

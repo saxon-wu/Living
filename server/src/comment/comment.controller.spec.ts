@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { CommentController } from './comment.controller';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '@src/app.module';
 
-describe('UserService', () => {
-  let service: UserService;
+describe('Comment Controller', () => {
+  let controller: CommentController;
   let articleUUID: string;
   let app: INestApplication;
 
@@ -12,11 +12,11 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
-
-    service = module.get<UserService>(UserService);
+    app = module.createNestApplication();
+    controller = module.get<CommentController>(CommentController);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });

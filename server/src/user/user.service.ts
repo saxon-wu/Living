@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
 import { validate } from 'class-validator';
-import { ParamDTO } from 'src/shared/shared.dto';
+import { ParamDTO } from '@src/shared/shared.dto';
 
 @Injectable()
 export class UserService {
@@ -68,14 +68,18 @@ export class UserService {
   /**
    * @description 查询所有
    * @author Saxon
-   * @date 2020-03-11
+   * @date 2020-03-16
+   * @param {boolean} [returnsUserEntity=false]
    * @returns
    * @memberof UserService
    */
-  async findAll() {
+  async findAll(returnsUserEntity: boolean = false) {
     const users = await this.userRepository.find({
       relations: this.relations,
     });
+    if (returnsUserEntity) {
+      return users;
+    }
     return users.map(v => v.toResponseObject());
   }
 
@@ -95,17 +99,17 @@ export class UserService {
    * @description 注销账号
    * @author Saxon
    * @date 2020-03-11
-   * @param {*} user
+   * @param {UserEntity} user
    * @returns
    * @memberof UserService
    */
-  async destroy(user) {
+  async destroy(user: UserEntity) {
     const { uuid } = user;
     await this.findOneByuuidForUser({ uuid });
 
     try {
-      const destroyed = await this.userRepository.delete({ uuid });
-      if (!destroyed.affected) {
+      const destroyingUser = await this.userRepository.delete({ uuid });
+      if (!destroyingUser.affected) {
         return '注销账号失败';
       }
       return '注销账号成功';
@@ -119,11 +123,11 @@ export class UserService {
    * @description 给article服务层调用
    * @author Saxon
    * @date 2020-03-12
-   * @param {*} user
+   * @param {UserEntity} user
    * @returns
    * @memberof UserService
    */
-  async bookmark(user) {
+  async bookmark(user: UserEntity) {
     return await this.userRepository.save(user);
   }
 }

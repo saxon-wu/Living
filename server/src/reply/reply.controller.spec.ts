@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { ReplyController } from './reply.controller';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '@src/app.module';
 
-describe('UserService', () => {
-  let service: UserService;
+describe('Reply Controller', () => {
+  let controller: ReplyController;
   let articleUUID: string;
   let app: INestApplication;
 
@@ -13,10 +13,10 @@ describe('UserService', () => {
       imports: [AppModule],
     }).compile();
 
-    service = module.get<UserService>(UserService);
+    controller = module.get<ReplyController>(ReplyController);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });
