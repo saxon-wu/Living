@@ -103,3 +103,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+#Minio config and data
+docker-data/minio/
