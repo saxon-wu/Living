@@ -6,7 +6,7 @@ import {
   Generated,
   DeleteDateColumn,
 } from 'typeorm';
-import * as dayjs from 'dayjs';
+import { formatDate } from './helper.util';
 
 export class SharedEntity {
   @PrimaryGeneratedColumn()
@@ -21,7 +21,7 @@ export class SharedEntity {
     transformer: {
       to() {},
       from(date: Date) {
-        return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+        return formatDate(date);
       },
     },
   })
@@ -32,7 +32,7 @@ export class SharedEntity {
     transformer: {
       to() {},
       from(date: Date) {
-        return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+        return formatDate(date);
       },
     },
   })
@@ -43,7 +43,7 @@ export class SharedEntity {
     transformer: {
       to() {},
       from(date: Date) {
-        return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+        return formatDate(date);
       },
     },
   })

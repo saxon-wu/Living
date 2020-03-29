@@ -14,16 +14,19 @@ import { User } from '@src/shared/user.decorator';
 import { ParamDTO } from '@src/shared/shared.dto';
 import { UserEntity } from './user.entity';
 
-@Controller('user')
+const MANY = 'users';
+const ONE = 'user'
+
+@Controller('v1')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
+  @Get(MANY)
   async findAll() {
     return await this.userService.findAll();
   }
 
-  @Get(':uuid')
+  @Get(`${ONE}/:uuid`)
   async findOne(@Param() paramDTO: ParamDTO) {
     return await this.userService.findOne(paramDTO);
   }
@@ -40,7 +43,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete('destruct')
+  @Delete(`${ONE}/destruct`)
   async destroy(@User() user: UserEntity) {
     return await this.userService.destroy(user);
   }

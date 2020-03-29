@@ -14,7 +14,10 @@ import { CreateCommentDTO } from './comment.dto';
 import { AuthGuard } from '@src/shared/auth.guard';
 import { UserEntity } from '@src/user/user.entity';
 
-@Controller('comment')
+const MANY = 'comments';
+const ONE = 'comment';
+
+@Controller('v1')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
@@ -26,13 +29,13 @@ export class CommentController {
    * @returns
    * @memberof CommentController
    */
-  @Get('article/:uuid')
+  @Get(`${MANY}/article/:uuid`)
   async findAll(@Param() articleParamDTO: ParamDTO) {
     return await this.commentService.findAll(articleParamDTO);
   }
 
   @UseGuards(AuthGuard)
-  @Post()
+  @Post(ONE)
   async create(
     @Body() createOrRelyComment: CreateCommentDTO,
     @User() user: UserEntity,
@@ -41,15 +44,15 @@ export class CommentController {
   }
 
   @UseGuards(AuthGuard)
-  @Post(':uuid/like')
+  @Post(`${ONE}/:uuid/like`)
   async like(@Param() commentParamDTO: ParamDTO, @User() user: UserEntity) {
     return await this.commentService.like(commentParamDTO, user);
   }
 
-  @Delete(':uuid')
+  @Delete(`${ONE}/:uuid`)
   async destroy(@Param() commentParamDTO: ParamDTO) {}
 
-  @Get(':uuid')
+  @Get(`${ONE}/:uuid`)
   async findOne(@Param() commentParamDto: ParamDTO) {
     return await this.commentService.findOne(commentParamDto);
   }

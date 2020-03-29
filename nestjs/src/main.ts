@@ -1,12 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './shared/http-exception.filter';
+import { TransformInterceptor } from './shared/transform.interceptor';
 
 const PORT = process.env.APP_PORT || 3000;
+const PREFIX = process.env.API_PREFIX || 'api';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 全局路由前缀
+  app.setGlobalPrefix(PREFIX);
+
+  // 全局注册错误的过滤器(错误异常)
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // 全局注册拦截器(成功返回格式)
+  app.useGlobalInterceptors(new TransformInterceptor());
+
+  // 全局使用管道(数据校验)
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // 自动将有效负载转换为对象类型，就是plainToClass

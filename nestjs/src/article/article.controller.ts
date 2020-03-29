@@ -16,28 +16,31 @@ import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
 import { UserEntity } from '@src/user/user.entity';
 
-@Controller('article')
+const MANY = 'articles';
+const ONE = 'article';
+
+@Controller('v1')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
-  @Get()
+  @Get(MANY)
   async findAll() {
     return await this.articleService.findAll();
   }
 
-  @Get(':uuid')
+  @Get(`${ONE}/:uuid`)
   async findOne(@Param() paramDTO: ParamDTO) {
     return await this.articleService.findOne(paramDTO);
   }
 
   @UseGuards(AuthGuard)
-  @Post()
+  @Post(ONE)
   async create(@Body() articleDTO: CreateArticleDTO, @User() user: UserEntity) {
     return await this.articleService.create(articleDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Put(':uuid')
+  @Put(`${ONE}/:uuid`)
   async update(
     @Param() articleParamDTO: ParamDTO,
     @Body() articleDTO: CreateArticleDTO,
@@ -47,7 +50,7 @@ export class ArticleController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':uuid')
+  @Delete(`${ONE}/:uuid`)
   async softDelete(
     @Param() articleParamDTO: ParamDTO,
     @User() user: UserEntity,
@@ -56,19 +59,19 @@ export class ArticleController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':uuid')
+  @Patch(`${ONE}/:uuid`)
   async softRestore(@Param() articleParamDTO: ParamDTO, user: UserEntity) {
     return await this.articleService.softRestore(articleParamDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Post(':uuid/like')
+  @Post(`${ONE}/:uuid/like`)
   async like(@Param() articleParamDTO: ParamDTO, @User() user: UserEntity) {
     return await this.articleService.like(articleParamDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Post(':uuid/bookmark')
+  @Post(`${ONE}/:uuid/bookmark`)
   async bookmark(@Param() articleParamDTO: ParamDTO, @User() user: UserEntity) {
     return await this.articleService.bookmark(articleParamDTO, user);
   }

@@ -14,12 +14,15 @@ import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
 import { UserEntity } from '@src/user/user.entity';
 
-@Controller('reply')
+const MANY = 'replies';
+const ONE = 'reply';
+
+@Controller('v1')
 export class ReplyController {
   constructor(private readonly replyService: ReplyService) {}
 
   @UseGuards(AuthGuard)
-  @Post()
+  @Post(ONE)
   async create(
     @Body() createReplyDTO: CreateReplyDTO,
     @User() user: UserEntity,
@@ -28,19 +31,19 @@ export class ReplyController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':uuid')
+  @Delete(`${ONE}/:uuid`)
   async softDelete(@Param() replyParamDTO: ParamDTO, user: UserEntity) {
     return await this.replyService.softDelete(replyParamDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':uuid')
+  @Patch(`${ONE}/:uuid`)
   async softRestore(@Param() replyParamDTO: ParamDTO, user: UserEntity) {
     return await this.replyService.softRestore(replyParamDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Post(':uuid/like')
+  @Post(`${ONE}/:uuid/like`)
   async like(@Param() replyParamDTO: ParamDTO, @User() user: UserEntity) {
     return await this.replyService.like(replyParamDTO, user);
   }
