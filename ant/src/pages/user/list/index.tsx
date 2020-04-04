@@ -1,99 +1,42 @@
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Divider, Dropdown, Menu, message } from 'antd';
-import React, { useState, useRef } from 'react';
+import { Divider } from 'antd';
+import React, { useRef, useState } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import CreateForm from './components/CreateForm';
-import UpdateForm, { FormValueType } from './components/UpdateForm';
-import { TableListItem } from './data';
-import { queryRule, updateRule, addRule, removeRule } from './service';
+import { IUser, IUpdateUser, UserStatusReference, UserStatusEnum } from '../data.d';
+import { queryUsersService } from '@/services/user.service';
+import { IPagination } from '@/shared/pagination.interface';
+import UpdateForm from '../components/UpdateForm';
+import { connect, IUserModelState } from 'umi';
 
-/**
- * 添加节点
- * @param fields
- */
-const handleAdd = async (fields: FormValueType) => {
-  const hide = message.loading('正在添加');
-  try {
-    await addRule({
-      desc: fields.desc,
-    });
-    hide();
-    message.success('添加成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('添加失败请重试！');
-    return false;
-  }
-};
+export interface IUserListProps {
+  updateUserFromModel: (id: number, data: IUpdateUser) => Promise<any>;
+}
 
-/**
- * 更新节点
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('正在配置');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
+interface IUserConnectState {
+  UserStateFromModel: IUserModelState;
+}
 
-    message.success('配置成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('配置失败请重试！');
-    return false;
-  }
-};
-
-/**
- *  删除节点
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: TableListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map(row => row.key),
-    });
-    hide();
-    message.success('删除成功，即将刷新');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('删除失败，请重试');
-    return false;
-  }
-};
-
-const TableList: React.FC<{}> = () => {
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
-  const [stepFormValues, setStepFormValues] = useState({});
+const UserList: React.FC<IUserListProps> = ({ updateUserFromModel }) => {
+  const [updateModalVisibleState, setUpdateModalVisible] = useState<boolean>(false);
+  const [formValuesState, setFormValuesState] = useState<Partial<IUser>>({});
   const actionRef = useRef<ActionType>();
-  const columns: ProColumns<TableListItem>[] = [
+  const columns: ProColumns<IUser>[] = [
     {
       title: 'ID',
-      dataIndex: 'id'
-    },
-    {
-      title: '用户名',
-      dataIndex: 'username',
+      dataIndex: 'id',
     },
     {
       title: '头像',
       dataIndex: 'avatar',
       render: (_, record) => (
         <>
-          <img src={record.avatar}/>
+          <img src={record.avatar} />
         </>
-      )
+      ),
+    },
+    {
+      title: '用户名',
+      dataIndex: 'username',
     },
     {
       title: '手机号',
@@ -104,24 +47,28 @@ const TableList: React.FC<{}> = () => {
       dataIndex: 'email',
     },
     {
-      title: '服务调用次数',
-      dataIndex: 'callNo',
+      title: '文章数',
+      dataIndex: 'articlesCount',
       sorter: true,
-      renderText: (val: string) => `${val} 万`,
+    },
+    {
+      title: '点赞数',
+      dataIndex: 'likeArticlesCount',
+      sorter: true,
+    },
+    {
+      title: '收藏数',
+      dataIndex: 'bookmarksCount',
+      sorter: true,
     },
     {
       title: '状态',
       dataIndex: 'status',
-      valueEnum: {
-        0: { text: '关闭', status: 'Default' },
-        1: { text: '运行中', status: 'Processing' },
-        2: { text: '已上线', status: 'Success' },
-        3: { text: '异常', status: 'Error' },
-      },
+      valueEnum: UserStatusReference,
     },
     {
-      title: '上次调度时间',
-      dataIndex: 'updatedAt',
+      title: '注册时间',
+      dataIndex: 'createdAt',
       sorter: true,
       valueType: 'dateTime',
     },
@@ -133,14 +80,14 @@ const TableList: React.FC<{}> = () => {
         <>
           <a
             onClick={() => {
-              handleUpdateModalVisible(true);
-              setStepFormValues(record);
+              setUpdateModalVisible(true);
+              setFormValuesState(record);
             }}
           >
-            配置
+            管理
           </a>
-          <Divider type="vertical" />
-          <a href="">订阅警报</a>
+          {/* <Divider type="vertical" />
+          <a href="">订阅警报</a> */}
         </>
       ),
     },
@@ -148,84 +95,61 @@ const TableList: React.FC<{}> = () => {
 
   return (
     <PageHeaderWrapper>
-      <ProTable<TableListItem>
-        headerTitle="查询表格"
+      <ProTable<IUser>
+        headerTitle="查询用户"
         actionRef={actionRef}
-        rowKey="key"
-        toolBarRender={(action, { selectedRows }) => [
-          <Button icon={<PlusOutlined />} type="primary" onClick={() => handleModalVisible(true)}>
-            新建
-          </Button>,
-          selectedRows && selectedRows.length > 0 && (
-            <Dropdown
-              overlay={
-                <Menu
-                  onClick={async e => {
-                    if (e.key === 'remove') {
-                      await handleRemove(selectedRows);
-                      action.reload();
-                    }
-                  }}
-                  selectedKeys={[]}
-                >
-                  <Menu.Item key="remove">批量删除</Menu.Item>
-                  <Menu.Item key="approval">批量审批</Menu.Item>
-                </Menu>
-              }
-            >
-              <Button>
-                批量操作 <DownOutlined />
-              </Button>
-            </Dropdown>
-          ),
-        ]}
-        tableAlertRender={(selectedRowKeys, selectedRows) => (
-          <div>
-            已选择 <a style={{ fontWeight: 600 }}>{selectedRowKeys.length}</a> 项&nbsp;&nbsp;
-            <span>
-              服务调用次数总计 {selectedRows.reduce((pre, item) => pre + item.callNo, 0)} 万
-            </span>
-          </div>
-        )}
-        request={params => queryRule(params)}
-        columns={columns}
-        rowSelection={{}}
-      />
-      <CreateForm
-        onSubmit={async value => {
-          const success = await handleAdd(value);
-          if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
+        rowKey="id"
+        request={async (params = {}) => {
+          const response = await queryUsersService(params as IPagination);
+          return {
+            data: response.result.items,
+            page: params.current,
+            success: true,
+            total: response.result.meta.totalItems,
+          };
         }}
-        onCancel={() => handleModalVisible(false)}
-        modalVisible={createModalVisible}
+        columns={columns}
+        rowSelection={false}
+        search={false}
       />
-      {stepFormValues && Object.keys(stepFormValues).length ? (
+      {formValuesState && Object.keys(formValuesState).length ? (
         <UpdateForm
-          onSubmit={async value => {
-            const success = await handleUpdate(value);
-            if (success) {
-              handleModalVisible(false);
-              setStepFormValues({});
+          onSubmit={(value) => {
+            updateUserFromModel(formValuesState.id as number, {
+              status: value.status as UserStatusEnum,
+            }).then((response) => {
+              setUpdateModalVisible(false);
               if (actionRef.current) {
                 actionRef.current.reload();
               }
-            }
+            });
           }}
           onCancel={() => {
-            handleUpdateModalVisible(false);
-            setStepFormValues({});
+            setUpdateModalVisible(false);
           }}
-          updateModalVisible={updateModalVisible}
-          values={stepFormValues}
+          updateModalVisible={updateModalVisibleState}
+          values={formValuesState}
         />
       ) : null}
     </PageHeaderWrapper>
   );
 };
 
-export default TableList;
+export default connect(
+  ({ UserStateFromModel }: IUserConnectState) => ({ UserStateFromModel }),
+  (dispatch) => ({
+    fetchUsersFromModel: () => {
+      dispatch({
+        type: 'UserModel/fetchUsersModel',
+      });
+    },
+    updateUserFromModel: (id: number, data: IUpdateUser) =>
+      new Promise((resolve, reject) => {
+        dispatch({
+          type: 'UserModel/updateUserModel',
+          payload: { id, data },
+          callback: (response: any) => resolve(response),
+        });
+      }),
+  }),
+)(UserList);

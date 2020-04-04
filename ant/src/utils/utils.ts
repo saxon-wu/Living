@@ -45,7 +45,7 @@ export const getAuthorityFromRouter = <T extends Route>(
 
 export const getRouteAuthority = (path: string, routeData: Route[]) => {
   let authorities: string[] | string | undefined;
-  routeData.forEach(route => {
+  routeData.forEach((route) => {
     // match prefix
     if (pathRegexp(`${route.path}/(.*)`).test(`${path}/`)) {
       if (route.authority) {
@@ -63,3 +63,16 @@ export const getRouteAuthority = (path: string, routeData: Route[]) => {
   });
   return authorities;
 };
+
+
+/**
+ * @description 枚举转为数组
+ * @author Saxon
+ * @date 2020-04-04
+ * @export
+ * @param {*} enumVariable
+ * @returns {string[]}
+ */
+export function enumToArray(enumVariable: any): string[] {
+  return Object.keys(enumVariable).map(key => enumVariable[key]);
+}

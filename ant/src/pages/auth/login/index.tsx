@@ -1,18 +1,18 @@
 import { AlipayCircleOutlined, TaobaoCircleOutlined, WeiboCircleOutlined } from '@ant-design/icons';
 import { Alert, Checkbox } from 'antd';
 import React, { useState } from 'react';
-import { Dispatch, AnyAction } from 'redux';
-import { Link } from 'umi';
-import { connect } from 'dva';
-import { StateType } from './model';
-import styles from './style.less';
-import { LoginParamsType } from './service';
+import { Link, connect, Dispatch } from 'umi';
+import { StateType } from '@/models/login.model';
+import { LoginParamsType } from '@/services/auth.service';
+import { IConnectState } from '@/models/connect';
 import LoginFrom from './components/Login';
+
+import styles from './style.less';
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginFrom;
 interface LoginProps {
-  dispatch: Dispatch<AnyAction>;
-  userAndlogin: StateType;
+  dispatch: Dispatch;
+  userLogin: StateType;
   submitting?: boolean;
 }
 
@@ -29,20 +29,18 @@ const LoginMessage: React.FC<{
   />
 );
 
-const Login: React.FC<LoginProps> = props => {
-  const { userAndlogin = {}, submitting } = props;
-  const { status, type: loginType } = userAndlogin;
+const Login: React.FC<LoginProps> = (props) => {
+  const { userLogin = {}, submitting } = props;
+  const { status, type: loginType } = userLogin;
   const [autoLogin, setAutoLogin] = useState(true);
   const [type, setType] = useState<string>('account');
 
   const handleSubmit = (values: LoginParamsType) => {
     const { dispatch } = props;
     dispatch({
-      type: 'userAndlogin/login',
-      payload: {
-        ...values,
-        type,
-      },
+      type: 'LoginModel/login',
+      // payload: { ...values, type },
+      payload: { ...values },
     });
   };
   return (
@@ -54,7 +52,7 @@ const Login: React.FC<LoginProps> = props => {
           )}
 
           <UserName
-            name="userName"
+            name="username"
             placeholder="用户名: admin or user"
             rules={[
               {
@@ -107,7 +105,7 @@ const Login: React.FC<LoginProps> = props => {
           />
         </Tab>
         <div>
-          <Checkbox checked={autoLogin} onChange={e => setAutoLogin(e.target.checked)}>
+          <Checkbox checked={autoLogin} onChange={(e) => setAutoLogin(e.target.checked)}>
             自动登录
           </Checkbox>
           <a
@@ -133,19 +131,7 @@ const Login: React.FC<LoginProps> = props => {
   );
 };
 
-export default connect(
-  ({
-    userAndlogin,
-    loading,
-  }: {
-    userAndlogin: StateType;
-    loading: {
-      effects: {
-        [key: string]: boolean;
-      };
-    };
-  }) => ({
-    userAndlogin,
-    submitting: loading.effects['userAndlogin/login'],
-  }),
-)(Login);
+export default connect(({ LoginModel, loading }: IConnectState) => ({
+  userLogin: LoginModel,
+  submitting: loading.effects['LoginModel/login'],
+}))(Login);

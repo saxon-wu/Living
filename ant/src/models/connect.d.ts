@@ -1,40 +1,31 @@
-import { AnyAction } from 'redux';
 import { MenuDataItem } from '@ant-design/pro-layout';
-import { RouterTypes } from 'umi';
-import { GlobalModelState } from './global';
-import { DefaultSettings as SettingModelState } from '../../config/defaultSettings';
-import { UserModelState } from './user';
-import { StateType } from './login';
+import { IGlobalModelState } from './global.model';
+import { IDefaultSettings as ISettingModelState } from '../../config/defaultSettings';
+import { IUserModelState } from './user.model';
+import { StateType } from './login.model';
 
-export { GlobalModelState, SettingModelState, UserModelState };
+export { IGlobalModelState, ISettingModelState, IUserModelState };
 
-export interface Loading {
+export interface ILoading {
   global: boolean;
   effects: { [key: string]: boolean | undefined };
   models: {
-    global?: boolean;
+    GlobalModel?: boolean;
     menu?: boolean;
-    setting?: boolean;
-    user?: boolean;
-    login?: boolean;
+    SettingModel?: boolean;
+    UserModel?: boolean;
+    LoginModel?: boolean;
   };
 }
 
-export interface ConnectState {
-  global: GlobalModelState;
-  loading: Loading;
-  settings: SettingModelState;
-  user: UserModelState;
-  login: StateType;
+export interface IConnectState {
+  GlobalModel: IGlobalModelState;
+  loading: ILoading;
+  SettingModel: ISettingModelState;
+  UserModel: IUserModelState;
+  LoginModel: StateType;
 }
 
 export interface Route extends MenuDataItem {
   routes?: Route[];
-}
-
-/**
- * @type T: Params matched in dynamic routing
- */
-export interface ConnectProps<T = {}> extends Partial<RouterTypes<Route, T>> {
-  dispatch?: Dispatch<AnyAction>;
 }

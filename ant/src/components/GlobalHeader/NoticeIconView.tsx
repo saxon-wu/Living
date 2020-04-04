@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
+import { connect, ConnectProps } from 'umi';
 import { Tag, message } from 'antd';
-import { connect } from 'dva';
 import groupBy from 'lodash/groupBy';
 import moment from 'moment';
-import { NoticeItem } from '@/models/global';
-import { CurrentUser } from '@/models/user';
-import { ConnectProps, ConnectState } from '@/models/connect';
+import { NoticeItem } from '@/models/global.model';
+import { IConnectState } from '@/models/connect';
 import NoticeIcon from '../NoticeIcon';
 import styles from './index.less';
+import { IUser } from '@/pages/user/data.d';
 
-export interface GlobalHeaderRightProps extends ConnectProps {
+export interface GlobalHeaderRightProps extends Partial<ConnectProps> {
   notices?: NoticeItem[];
-  currentUser?: CurrentUser;
+  currentUser?: IUser;
   fetchingNotices?: boolean;
   onNoticeVisibleChange?: (visible: boolean) => void;
   onNoticeClear?: (tabName?: string) => void;
@@ -23,7 +23,7 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
 
     if (dispatch) {
       dispatch({
-        type: 'global/fetchNotices',
+        type: 'GlobalModel/fetchNotices',
       });
     }
   }
@@ -34,7 +34,7 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
 
     if (dispatch) {
       dispatch({
-        type: 'global/changeNoticeReadState',
+        type: 'GlobalModel/changeNoticeReadState',
         payload: id,
       });
     }
@@ -46,7 +46,7 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
 
     if (dispatch) {
       dispatch({
-        type: 'global/clearNotices',
+        type: 'GlobalModel/clearNotices',
         payload: key,
       });
     }
@@ -57,11 +57,11 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
   } => {
     const { notices = [] } = this.props;
 
-    if (notices.length === 0) {
+    if (!notices || notices.length === 0) {
       return {};
     }
 
-    const newNotices = notices.map(notice => {
+    const newNotices = notices.map((notice) => {
       const newNotice = { ...notice };
 
       if (newNotice.datetime) {
@@ -100,7 +100,7 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
     const unreadMsg: {
       [key: string]: number;
     } = {};
-    Object.keys(noticeData).forEach(key => {
+    Object.keys(noticeData).forEach((key) => {
       const value = noticeData[key];
 
       if (!unreadMsg[key]) {
@@ -108,7 +108,7 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
       }
 
       if (Array.isArray(value)) {
-        unreadMsg[key] = value.filter(item => !item.read).length;
+        unreadMsg[key] = value.filter((item) => !item.read).length;
       }
     });
     return unreadMsg;
@@ -122,7 +122,7 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
       <NoticeIcon
         className={styles.action}
         count={currentUser && currentUser.unreadCount}
-        onItemClick={item => {
+        onItemClick={(item) => {
           this.changeReadState(item as NoticeItem);
         }}
         loading={fetchingNotices}
@@ -162,10 +162,10 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
   }
 }
 
-export default connect(({ user, global, loading }: ConnectState) => ({
-  currentUser: user.currentUser,
-  collapsed: global.collapsed,
-  fetchingMoreNotices: loading.effects['global/fetchMoreNotices'],
-  fetchingNotices: loading.effects['global/fetchNotices'],
-  notices: global.notices,
+export default connect(({ UserModel, GlobalModel, loading }: IConnectState) => ({
+  currentUser: UserModel.currentUser,
+  collapsed: GlobalModel.collapsed,
+  fetchingMoreNotices: loading.effects['GlobalModel/fetchMoreNotices'],
+  fetchingNotices: loading.effects['GlobalModel/fetchNotices'],
+  notices: GlobalModel.notices,
 }))(GlobalHeaderRight);

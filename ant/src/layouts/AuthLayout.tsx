@@ -1,21 +1,19 @@
 import { DefaultFooter, MenuDataItem, getMenuData, getPageTitle } from '@ant-design/pro-layout';
-import { Helmet } from 'react-helmet';
-import { Link } from 'umi';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { Link, useIntl, ConnectProps, connect } from 'umi';
 import React from 'react';
-import { formatMessage } from 'umi-plugin-react/locale';
-import { connect } from 'dva';
 import SelectLang from '@/components/SelectLang';
-import { ConnectProps, ConnectState } from '@/models/connect';
+import { IConnectState } from '@/models/connect';
 import logo from '../assets/logo.svg';
 import styles from './AuthLayout.less';
 
-export interface AuthLayoutProps extends ConnectProps {
+export interface AuthLayoutProps extends Partial<ConnectProps> {
   breadcrumbNameMap: {
     [path: string]: MenuDataItem;
   };
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = props => {
+const AuthLayout: React.FC<AuthLayoutProps> = (props) => {
   const {
     route = {
       routes: [],
@@ -28,6 +26,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = props => {
       pathname: '',
     },
   } = props;
+  const { formatMessage } = useIntl();
   const { breadcrumb } = getMenuData(routes);
   const title = getPageTitle({
     pathname: location.pathname,
@@ -36,7 +35,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = props => {
     ...props,
   });
   return (
-    <>
+    <HelmetProvider>
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={title} />
@@ -60,8 +59,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = props => {
         </div>
         <DefaultFooter />
       </div>
-    </>
+    </HelmetProvider>
   );
 };
 
-export default connect(({ settings }: ConnectState) => ({ ...settings }))(AuthLayout);
+export default connect(({ SettingModel }: IConnectState) => ({ ...SettingModel }))(AuthLayout);

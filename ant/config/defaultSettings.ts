@@ -2,7 +2,7 @@ import { MenuTheme } from 'antd/es/menu/MenuContext';
 
 export type ContentWidth = 'Fluid' | 'Fixed';
 
-export interface DefaultSettings {
+export interface IDefaultSettings {
   /**
    * theme for nav menu
    */
@@ -58,4 +58,4 @@ export default {
   title: 'Ant Design Pro',
   pwa: false,
   iconfontUrl: '',
-} as DefaultSettings;
+} as IDefaultSettings;
