@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { ArticleStatusEnum } from './article.entity';
 export class CreateArticleDTO {
   @IsOptional()
   @IsNotEmpty()
@@ -9,4 +10,21 @@ export class CreateArticleDTO {
   @IsNotEmpty()
   @IsString()
   content: string;
+}
+
+export class UpdateArticleDTO {
+  @IsNotEmpty()
+  @IsString()
+  title: string;
+
+  @IsNotEmpty()
+  @IsString()
+  content: string;
+}
+
+export class UpdateArticleDTOForAdmin {
+  @IsNotEmpty()
+  @IsString()
+  @IsEnum(ArticleStatusEnum)
+  status: ArticleStatusEnum;
 }

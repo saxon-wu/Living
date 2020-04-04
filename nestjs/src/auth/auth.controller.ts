@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseInterceptors, ClassSerializerInterceptor } f
 import { AuthService } from './auth.service';
 import { LoginDTO } from './auth.dto';
 
-@Controller('auth')
+@Controller('v1/auth')
 export class AuthController {
     constructor(private readonly authService: AuthService){}
 

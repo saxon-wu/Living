@@ -15,15 +15,33 @@ export class TransformInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
-    
+    const ctx = context.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+
     const now = Date.now();
 
+    let message: string = '请求成功';
+    switch (request.method) {
+      case 'GET':
+        message = '获取成功';
+        break;
+      case 'POST':
+        message = '创建成功';
+        break;
+      case 'PUT':
+        message = '更新成功';
+        break;
+      case 'DELETE':
+        message = '删除成功';
+        break;
+    }
     return next.handle().pipe(
       map((data: any) => {
         const obj = {
           statusCode: 0,
           responseTime: `${Date.now() - now}ms`,
-          message: '请求成功',
+          message,
           result: classToPlain(data),
         };
         if (data?.message) {

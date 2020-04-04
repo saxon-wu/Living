@@ -8,19 +8,25 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ArticleEntity } from './article.entity';
+import { ArticleEntity, ArticleStatusEnum } from './article.entity';
 import { Repository } from 'typeorm';
-import { CreateArticleDTO } from './article.dto';
+import { CreateArticleDTO, UpdateArticleDTO, UpdateArticleDTOForAdmin } from './article.dto';
 import { validate } from 'class-validator';
-import { ParamDTO } from '@src/shared/shared.dto';
+import { ParamDTO, IdParamDTO } from '@src/shared/shared.dto';
 import { UserService } from '@src/user/user.service';
 import { UserEntity } from '@src/user/user.entity';
 import { plainToClass } from 'class-transformer';
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class ArticleService {
   private readonly logger: Logger = new Logger(ArticleService.name);
   private readonly relations = ['publisher', 'likes', 'bookmarkUsers'];
+  private readonly table = 'article';
 
   constructor(
     @InjectRepository(ArticleEntity)
@@ -61,22 +67,33 @@ export class ArticleService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-12
-   * @param {ParamDTO} articleParamDTO
+   * @param {(ParamDTO | IdParamDTO)} articleParamDTO
    * @param {boolean} [returnsUserEntity=false]
    * @returns
    * @memberof ArticleService
    */
   async findOneByuuidForArticle(
-    articleParamDTO: ParamDTO,
+    articleParamDTO: ParamDTO | IdParamDTO,
     returnsUserEntity: boolean = false,
   ) {
-    const { uuid } = articleParamDTO;
-    const article = await this.articleRepository.findOne(
-      { uuid },
-      {
+    let article: ArticleEntity;
+    if ((articleParamDTO as ParamDTO).uuid) {
+      const { uuid } = <ParamDTO>articleParamDTO;
+      article = await this.articleRepository.findOne(
+        { uuid },
+        {
+          relations: this.relations,
+        },
+      );
+    } else if ((articleParamDTO as IdParamDTO).id) {
+      const { id } = <IdParamDTO>articleParamDTO;
+      article = await this.articleRepository.findOne(id, {
         relations: this.relations,
-      },
-    );
+      });
+    } else {
+      throw new BadRequestException('亲，传入的参数不正确');
+    }
+
     if (!article) {
       throw new NotFoundException('文章不存在');
     }
@@ -93,11 +110,19 @@ export class ArticleService {
    * @returns
    * @memberof ArticleService
    */
-  async findAll() {
-    const articles = await this.articleRepository.find({
-      relations: this.relations,
-    });
-    return articles.map(v => v.toResponseObject());
+  async findAll(options: IPaginationOptions) {
+    const queryBuilder = this.articleRepository.createQueryBuilder(this.table);
+    for (const item of this.relations) {
+      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
+    }
+    const articles: Pagination<ArticleEntity> = await paginate<ArticleEntity>(
+      queryBuilder,
+      options,
+    );
+    return {
+      ...articles,
+      items: articles.items.map(v => v.toResponseObject()),
+    };
   }
 
   /**
@@ -108,7 +133,7 @@ export class ArticleService {
    * @returns
    * @memberof ArticleService
    */
-  async findOne(articleParamDTO: ParamDTO) {
+  async findOne(articleParamDTO: ParamDTO | IdParamDTO) {
     return await this.findOneByuuidForArticle(articleParamDTO);
   }
 
@@ -306,6 +331,76 @@ export class ArticleService {
     try {
       const savingBookmarkByUser = await this.userService.bookmark(user);
       return savingBookmarkByUser.toResponseObject();
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
+    }
+  }
+
+  /** ------------------------------------ADMIN------------------------------------------ */
+
+  /**
+   * @description 查询所有[后台接口]
+   * @author Saxon
+   * @date 2020-04-01
+   * @param {IPaginationOptions} options
+   * @returns
+   * @memberof ArticleService
+   */
+  async findAllForAdmin(options: IPaginationOptions) {
+    const queryBuilder = this.articleRepository.createQueryBuilder(this.table);
+    for (const item of this.relations) {
+      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
+    }
+    const articles: Pagination<ArticleEntity> = await paginate<ArticleEntity>(
+      queryBuilder,
+      options,
+    );
+    return {
+      ...articles,
+      items: articles.items.map(v =>
+        v.toResponseObject(/**isAdminSide */ true),
+      ),
+    };
+  }
+
+  /**
+   * @description 更新
+   * @author Saxon
+   * @date 2020-04-01
+   * @param {IdParamDTO} idParamDTO
+   * @param {UpdateArticleDTO} articleDTO
+   * @returns
+   * @memberof ArticleService
+   */
+  async updateForAdmin(idParamDTO: IdParamDTO, articleDTO: UpdateArticleDTOForAdmin) {
+    const { id } = idParamDTO;
+    const { status } = articleDTO;
+    const article: ArticleEntity = await this.findOneByuuidForArticle(
+      idParamDTO,
+      /* returnsUserEntity */ true,
+    );
+
+    switch (status) {
+      case ArticleStatusEnum.NORMAL:
+        articleDTO.status = ArticleStatusEnum.NORMAL;
+        break;
+      case ArticleStatusEnum.DISABLED:
+        articleDTO.status = ArticleStatusEnum.DISABLED;
+        break;
+      default:
+        throw new BadRequestException('亲，传入的参数不正确');
+    }
+
+    try {
+      const updatingAticle = await this.articleRepository.update(
+        id,
+        articleDTO,
+      );
+      if (!updatingAticle.affected) {
+        return '更新失败';
+      }
+      return null;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');

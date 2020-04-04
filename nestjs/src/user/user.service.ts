@@ -6,15 +6,22 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from './user.entity';
+import { UserEntity, UserStatusEnum } from './user.entity';
 import { Repository } from 'typeorm';
 import { validate } from 'class-validator';
-import { ParamDTO } from '@src/shared/shared.dto';
+import { ParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
+import { UpdateUserDTO } from './user.dto';
 
 @Injectable()
 export class UserService {
   private readonly logger: Logger = new Logger(UserService.name);
   private readonly relations = ['articles', 'bookmarks', 'likeArticles'];
+  private readonly table = 'user';
 
   constructor(
     @InjectRepository(UserEntity)
@@ -40,22 +47,33 @@ export class UserService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-11
-   * @param {ParamDTO} paramDTO
+   * @param {(ParamDTO | IdParamDTO)} userParamDTO
    * @param {boolean} [returnsUserEntity=false]
    * @returns
    * @memberof UserService
    */
   async findOneByuuidForUser(
-    paramDTO: ParamDTO,
+    userParamDTO: ParamDTO | IdParamDTO,
     returnsUserEntity: boolean = false,
   ) {
-    const { uuid } = paramDTO;
-    const user = await this.userRepository.findOne(
-      { uuid },
-      {
+    let user: UserEntity;
+    if ((userParamDTO as ParamDTO).uuid) {
+      const { uuid } = <ParamDTO>userParamDTO;
+      user = await this.userRepository.findOne(
+        { uuid },
+        {
+          relations: this.relations,
+        },
+      );
+    } else if ((userParamDTO as IdParamDTO).id) {
+      const { id } = <IdParamDTO>userParamDTO;
+      user = await this.userRepository.findOne(id, {
         relations: this.relations,
-      },
-    );
+      });
+    } else {
+      throw new BadRequestException('亲，传入的参数不正确');
+    }
+
     if (!user) {
       throw new NotFoundException('用户不存在');
     }
@@ -91,7 +109,7 @@ export class UserService {
    * @returns
    * @memberof UserService
    */
-  async findOne(paramDTO: ParamDTO) {
+  async findOne(paramDTO: ParamDTO | IdParamDTO) {
     return await this.findOneByuuidForUser(paramDTO);
   }
 
@@ -129,5 +147,61 @@ export class UserService {
    */
   async bookmark(user: UserEntity) {
     return await this.userRepository.save(user);
+  }
+
+  /** ------------------------------------ADMIN------------------------------------------ */
+
+  /**
+   * @description 查询所有[后台接口]
+   * @author Saxon
+   * @date 2020-04-03
+   * @param {IPaginationOptions} options
+   * @returns
+   * @memberof UserService
+   */
+  async findAllForAdmin(options: IPaginationOptions) {
+    const queryBuilder = this.userRepository.createQueryBuilder(this.table);
+    for (const item of this.relations) {
+      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
+    }
+    const users: Pagination<UserEntity> = await paginate<UserEntity>(
+      queryBuilder,
+      options,
+    );
+    return {
+      ...users,
+      items: users.items.map(v => v.toResponseObject(/**isAdminSide */ true)),
+    };
+  }
+
+  async updateForAdmin(idParamDTO: IdParamDTO, userDTO: UpdateUserDTO) {
+    const { id } = idParamDTO;
+    const { status } = userDTO;
+    const user: UserEntity = await this.findOneByuuidForUser(
+      idParamDTO,
+      /* returnsUserEntity */ true,
+    );
+
+    switch (status) {
+      case UserStatusEnum.DISABLED:
+        userDTO.status = UserStatusEnum.DISABLED;
+        break;
+      case UserStatusEnum.NORMAL:
+        userDTO.status = UserStatusEnum.NORMAL;
+        break;
+      default:
+        throw new BadRequestException('亲，传入的参数不正确');
+    }
+
+    try {
+      const updatingAticle = await this.userRepository.update(id, userDTO);
+      if (!updatingAticle.affected) {
+        return '更新失败';
+      }
+      return null;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
+    }
   }
 }

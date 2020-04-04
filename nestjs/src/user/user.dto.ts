@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { UserStatusEnum } from './user.entity';
 
 export class CreateUserDTO {
   @IsString()
@@ -8,4 +9,11 @@ export class CreateUserDTO {
   @IsString()
   @IsNotEmpty()
   password: string;
+}
+
+export class UpdateUserDTO {
+  @IsNotEmpty()
+  @IsString()
+  @IsEnum(UserStatusEnum)
+  status: UserStatusEnum;
 }

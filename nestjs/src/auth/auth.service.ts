@@ -2,8 +2,8 @@ import {
   Injectable,
   Logger,
   ConflictException,
-  ForbiddenException,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '@src/user/user.entity';
@@ -31,7 +31,7 @@ export class AuthService {
     const { username, password } = loginDTO;
     const user = await this.userRepository.findOne({ username });
     if (!user || !user.comparePassword(password)) {
-      throw new ForbiddenException('亲，用户或密码不正确');
+      throw new UnauthorizedException('亲，用户或密码不正确');
     }
     return user.toResponseObject(false, true);
   }

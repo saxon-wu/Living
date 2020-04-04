@@ -12,6 +12,11 @@ import { UserEntity } from '@src/user/user.entity';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
 
+export enum ArticleStatusEnum {
+  NORMAL = 'Normal',
+  DISABLED = 'Disabled',
+}
+
 @Entity('article')
 export class ArticleEntity extends SharedEntity {
   @IsNotEmpty()
@@ -25,6 +30,21 @@ export class ArticleEntity extends SharedEntity {
     type: 'text',
   })
   content: string;
+
+  @Column({
+    type: 'enum',
+    enum: ArticleStatusEnum,
+    default: ArticleStatusEnum.NORMAL,
+  })
+  status: ArticleStatusEnum;
+
+  @Column({
+    type: 'boolean',
+    name: 'is_public',
+    default: false,
+    comment: '文章是否公开，即是不是草稿'
+  })
+  isPublic: boolean;
 
   /**
    * @description 发布者
@@ -96,6 +116,7 @@ export class ArticleEntity extends SharedEntity {
       publisher,
       likes,
       bookmarkUsers,
+      status,
     } = this;
     const common = {
       title,
@@ -110,6 +131,7 @@ export class ArticleEntity extends SharedEntity {
       return {
         id,
         uuid,
+        status,
         createdAt,
         updatedAt,
         ...common,

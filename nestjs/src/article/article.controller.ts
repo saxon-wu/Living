@@ -8,6 +8,7 @@ import {
   Body,
   UseGuards,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDTO } from './article.dto';
@@ -24,8 +25,14 @@ export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @Get(MANY)
-  async findAll() {
-    return await this.articleService.findAll();
+  async findAll(
+    @Query('current') page: number = 1,
+    @Query('pageSize') limit: number = 10,
+  ) {
+    // nestjs 7.0 自动转换number,bool未传时则为NaN,false
+    if (isNaN(page)) page = 1;
+    if (isNaN(limit)) limit = 10;
+    return await this.articleService.findAll({ page, limit });
   }
 
   @Get(`${ONE}/:uuid`)

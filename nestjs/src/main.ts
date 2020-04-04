@@ -3,12 +3,26 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './shared/http-exception.filter';
 import { TransformInterceptor } from './shared/transform.interceptor';
+import * as rateLimit from 'express-rate-limit';
 
 const PORT = process.env.APP_PORT || 3000;
 const PREFIX = process.env.API_PREFIX || 'api';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // // 允许跨域资源共享
+  app.enableCors({
+    origin: ['http://localhost:8000', 'http://localhost']
+  });
+
+  // somewhere in your initialization file
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+    }),
+  );
 
   // 全局路由前缀
   app.setGlobalPrefix(PREFIX);

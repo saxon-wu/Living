@@ -15,7 +15,7 @@ import { ParamDTO } from '@src/shared/shared.dto';
 import { UserEntity } from './user.entity';
 
 const MANY = 'users';
-const ONE = 'user'
+const ONE = 'user';
 
 @Controller('v1')
 export class UserController {
@@ -46,5 +46,12 @@ export class UserController {
   @Delete(`${ONE}/destruct`)
   async destroy(@User() user: UserEntity) {
     return await this.userService.destroy(user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post(`${ONE}/whoami`)
+  async whoami(@User() user: UserEntity) {
+    const { uuid } = user;
+    return await this.userService.findOne({ uuid });
   }
 }

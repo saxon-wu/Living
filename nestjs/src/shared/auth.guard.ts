@@ -2,25 +2,39 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { UserService } from '@src/user/user.service';
+import { IdParamDTO, ParamDTO } from './shared.dto';
+import { Validator } from 'class-validator';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly userService: UserService) {}
+  private readonly validator = new Validator();
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
     const decode: any = this.validateRequest(request.headers.authorization);
-    // request.user是内部使用的，所以findOneByuuidForUser返回UserEntity类型更方便，比如关联存储
-    request.user = await this.userService.findOneByuuidForUser(
-      { uuid: decode.id },
-      true,
-    );
 
+    const idOrUUID = decode.id;
+    let param: any = {};
+    if (
+      this.validator.isUUID(idOrUUID, this.configService.get('UUID_VERSION'))
+    ) {
+      (param as ParamDTO).uuid = idOrUUID;
+    } else {
+      (param as IdParamDTO).id = idOrUUID;
+    }
+
+    // request.user是内部使用的，所以findOneByuuidForUser返回UserEntity类型更方便，比如关联存储
+    request.user = await this.userService.findOneByuuidForUser(param, true);
     return true;
   }
 
@@ -34,10 +48,10 @@ export class AuthGuard implements CanActivate {
    */
   validateRequest(authorization: string) {
     if (!authorization) {
-      throw new ForbiddenException('亲，没有令牌');
+      throw new UnauthorizedException('亲，没有令牌');
     }
     if (authorization.split(' ')[0] !== 'Bearer') {
-      throw new ForbiddenException('亲，无效令牌');
+      throw new UnauthorizedException('亲，无效令牌');
     }
     const token = authorization.split(' ')[1];
 
@@ -45,7 +59,7 @@ export class AuthGuard implements CanActivate {
       const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
       return decode;
     } catch (error) {
-      throw new ForbiddenException(error);
+      throw new UnauthorizedException(error);
     }
   }
 }

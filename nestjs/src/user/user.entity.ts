@@ -19,6 +19,11 @@ interface ITokenResponseObject {
   readonly expiresIn: string | number;
 }
 
+export enum UserStatusEnum {
+  NORMAL = 'Normal',
+  DISABLED = 'Disabled',
+}
+
 @Entity('user')
 export class UserEntity extends SharedEntity {
   constructor(partial: Partial<UserEntity>) {
@@ -40,6 +45,14 @@ export class UserEntity extends SharedEntity {
     nullable: true,
   })
   password: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatusEnum,
+    default: UserStatusEnum.NORMAL,
+    comment: '封号: 不可登录'
+  })
+  status: UserStatusEnum;
 
   /**
    * @description 用户发布的文章
@@ -168,6 +181,7 @@ export class UserEntity extends SharedEntity {
       bookmarks,
       likeArticles,
       tokenObject,
+      status,
     } = this;
     const common = {
       username,
@@ -182,6 +196,7 @@ export class UserEntity extends SharedEntity {
       return {
         id,
         uuid,
+        status,
         createdAt,
         updatedAt,
         ...common,
