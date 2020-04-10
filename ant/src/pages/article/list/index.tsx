@@ -107,6 +107,7 @@ const ArticleList: React.FC<IArticleListProps> = ({ updateArticleFromModel }) =>
               status: value.status as ArticleStatusEnum,
             }).then((response) => {
               setUpdateModalVisible(false);
+              setFormValuesState({});
               if (actionRef.current) {
                 actionRef.current.reload();
               }
@@ -114,6 +115,7 @@ const ArticleList: React.FC<IArticleListProps> = ({ updateArticleFromModel }) =>
           }}
           onCancel={() => {
             setUpdateModalVisible(false);
+            setFormValuesState({});
           }}
           updateModalVisible={updateModalVisibleState}
           values={formValuesState}

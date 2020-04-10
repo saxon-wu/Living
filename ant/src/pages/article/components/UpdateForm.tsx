@@ -25,9 +25,7 @@ const UpdateForm: React.FC<UpdateFormProps> = ({
   updateModalVisible,
   values,
 }) => {
-  const [formValuesState, setFormValuesState] = useState<Partial<IArticle>>({
-    status: values.status,
-  });
+  const [formValuesState, setFormValuesState] = useState<Partial<IArticle>>(values);
 
   const [form] = Form.useForm();
 
@@ -79,9 +77,7 @@ const UpdateForm: React.FC<UpdateFormProps> = ({
       <Form
         {...formLayout}
         form={form}
-        initialValues={{
-          status: formValuesState.status,
-        }}
+        initialValues={formValuesState}
       >
         {renderContent()}
       </Form>

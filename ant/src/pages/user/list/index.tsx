@@ -119,6 +119,7 @@ const UserList: React.FC<IUserListProps> = ({ updateUserFromModel }) => {
               status: value.status as UserStatusEnum,
             }).then((response) => {
               setUpdateModalVisible(false);
+              setFormValuesState({});
               if (actionRef.current) {
                 actionRef.current.reload();
               }
@@ -126,6 +127,7 @@ const UserList: React.FC<IUserListProps> = ({ updateUserFromModel }) => {
           }}
           onCancel={() => {
             setUpdateModalVisible(false);
+            setFormValuesState({});
           }}
           updateModalVisible={updateModalVisibleState}
           values={formValuesState}

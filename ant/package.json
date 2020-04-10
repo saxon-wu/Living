@@ -1,7 +1,9 @@
 {
   "name": "ant-design-pro",
   "version": "1.0.0",
+  "author": "Saxon",
   "private": true,
+  "license": "Apache",
   "description": "An out-of-box UI solution for enterprise applications",
   "scripts": {
     "analyze": "cross-env ANALYZE=1 umi build",
