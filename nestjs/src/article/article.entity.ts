@@ -11,11 +11,8 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { UserEntity } from '@src/user/user.entity';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
-
-export enum ArticleStatusEnum {
-  NORMAL = 'Normal',
-  DISABLED = 'Disabled',
-}
+import { ArticleStatusEnum } from './article.enum';
+import { IArticleOutput } from './article.interface';
 
 @Entity('article')
 export class ArticleEntity extends SharedEntity {
@@ -42,7 +39,7 @@ export class ArticleEntity extends SharedEntity {
     type: 'boolean',
     name: 'is_public',
     default: false,
-    comment: '文章是否公开，即是不是草稿'
+    comment: '文章是否公开，即是不是草稿',
   })
   isPublic: boolean;
 
@@ -105,7 +102,7 @@ export class ArticleEntity extends SharedEntity {
    * @returns
    * @memberof ArticleEntity
    */
-  toResponseObject(isAdminSide: boolean = false) {
+  toResponseObject(isAdminSide: boolean = false): IArticleOutput {
     const {
       id,
       uuid,

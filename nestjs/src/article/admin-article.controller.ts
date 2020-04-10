@@ -37,7 +37,7 @@ export class AdminArticleController {
     // nestjs 7.0 自动转换number,bool未传时则为NaN,false
     if (isNaN(page)) page = 1;
     if (isNaN(limit)) limit = 10;
-    return await this.articleService.findAllForAdmin({ page, limit });
+    return await this.articleService.findAll({ page, limit }, true);
   }
 
   @Get(`${ONE}/:id`)

@@ -13,6 +13,7 @@ describe('测试完整流程', () => {
   let accessToken: string;
   let randomArticle;
   let randomComment;
+  const API_VERSION = 'v1';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,11 +25,11 @@ describe('测试完整流程', () => {
   });
 
   describe('获取所有用户', () => {
-    it('/user (GET)', async done => {
+    it(`/${API_VERSION}/users (GET)`, async done => {
       const response = await request(server)
-        .get('/user')
+        .get(`/${API_VERSION}/users`)
         .expect(200);
-      const users = response.body;
+      const users = response.body.items;
       randomUser = users[random(users.length)];
       expect(randomUser).toHaveProperty('id');
       expect(randomUser).toHaveProperty('username');
@@ -37,9 +38,9 @@ describe('测试完整流程', () => {
   });
 
   describe('随机用户登录', () => {
-    it('/auth/login (POST)', async done => {
+    it(`/${API_VERSION}/auth/login (POST)`, async done => {
       const response = await request(server)
-        .post('/auth/login')
+        .post(`/${API_VERSION}/auth/login`)
         .send({
           username: randomUser.username,
           password: '123456',
@@ -58,11 +59,11 @@ describe('测试完整流程', () => {
   });
 
   describe('发布文章', () => {
-    it('/article (POST)', async done => {
+    it(`/${API_VERSION}/article (POST)`, async done => {
       const title = faker.name.title();
       const content = faker.lorem.paragraphs();
       const response = await request(server)
-        .post('/article')
+        .post(`/${API_VERSION}/article`)
         .set('Authorization', `Bearer ${accessToken}`)
         .send({ title, content })
         .expect(201);
@@ -74,11 +75,11 @@ describe('测试完整流程', () => {
   });
 
   describe('获取所有文章', () => {
-    it('/article (GET)', async done => {
+    it(`/${API_VERSION}/article (GET)`, async done => {
       const response = await request(server)
-        .get('/article')
+        .get(`/${API_VERSION}/articles`)
         .expect(200);
-      const articles = response.body;
+      const articles = response.body.items;
       randomArticle = articles[random(articles.length)];
       expect(randomArticle).toHaveProperty('title');
       expect(randomArticle).toHaveProperty('content');
@@ -87,9 +88,9 @@ describe('测试完整流程', () => {
   });
 
   describe('随机为文章点赞或取消点赞', () => {
-    it('/article/:uuid/like (POST)', async done => {
+    it(`/${API_VERSION}/article/:uuid/like (POST)`, async done => {
       const response = await request(server)
-        .post(`/article/${randomArticle.id}/like`)
+        .post(`/${API_VERSION}/article/${randomArticle.id}/like`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(201);
       const article = response.body;
@@ -100,9 +101,9 @@ describe('测试完整流程', () => {
   });
 
   describe('随机收藏或取消收藏文章', () => {
-    it('/article/:uuid/bookmark (POST)', async done => {
+    it(`/${API_VERSION}/article/:uuid/bookmark (POST)`, async done => {
       const response = await request(server)
-        .post(`/article/${randomArticle.id}/bookmark`)
+        .post(`/${API_VERSION}/article/${randomArticle.id}/bookmark`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(201);
       const user = response.body;
@@ -112,10 +113,10 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对文章评论', () => {
-    it('/comment (POST)', async done => {
+    it(`/${API_VERSION}/comment (POST)`, async done => {
       const content = faker.lorem.lines();
       const response = await request(server)
-        .post(`/comment`)
+        .post(`/${API_VERSION}/comment`)
         .send({ content, articleId: randomArticle.id })
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(201);
@@ -127,12 +128,12 @@ describe('测试完整流程', () => {
   });
 
   describe('获取所有评论', () => {
-    it('/comment/article/:uuid (GET)', async done => {
+    it(`/${API_VERSION}/comment/article/:uuid (GET)`, async done => {
       const response = await request(server)
-        .get(`/comment/article/${randomArticle.id}`)
+        .get(`/${API_VERSION}/comments/article/${randomArticle.id}`)
         .expect(200);
-      const comment = response.body;
-      randomComment = comment[random(comment.length)];
+      const comments = response.body.items;
+      randomComment = comments[random(comments.length)];
       expect(randomComment).toHaveProperty('id');
       expect(randomComment).toHaveProperty('content');
       done();
@@ -140,10 +141,10 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对评论回复', () => {
-    it('/reply (POST)', async done => {
+    it(`/${API_VERSION}/reply (POST)`, async done => {
       const content = faker.lorem.lines();
       const response = await request(server)
-        .post(`/reply`)
+        .post(`/${API_VERSION}/reply`)
         .send({ content, commentId: randomComment.id })
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(201);
@@ -155,10 +156,10 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对评论点赞', () => {
-    it('/comment/:uuid/like (POST)', async done => {
+    it(`/${API_VERSION}/comment/:uuid/like (POST)`, async done => {
       const content = faker.lorem.lines();
       const response = await request(server)
-        .post(`/comment/${randomComment.id}/like`)
+        .post(`/${API_VERSION}/comment/${randomComment.id}/like`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(201);
       const reply = response.body;
@@ -168,7 +169,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对“回复”回复', () => {
-    it('/reply (POST)', async done => {
+    it(`/${API_VERSION}/reply (POST)`, async done => {
       const randomReplyLength = randomComment.replies.length;
       if (!randomReplyLength) {
         console.error('同一评论没有可以回复的目标');
@@ -177,7 +178,7 @@ describe('测试完整流程', () => {
       const randomReply = randomComment.replies[random(randomReplyLength)];
       const content = faker.lorem.lines();
       const response = await request(server)
-        .post(`/reply`)
+        .post(`/${API_VERSION}/reply`)
         .send({
           content,
           commentId: randomComment.id,
@@ -193,7 +194,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对“回复”点赞', () => {
-    it('/reply/:uuid/like (POST)', async done => {
+    it(`/${API_VERSION}/reply/:uuid/like (POST)`, async done => {
       const randomReplyLength = randomComment.replies.length;
       if (!randomReplyLength) {
         console.error('同一评论没有可以回复的点赞目标');
@@ -201,7 +202,7 @@ describe('测试完整流程', () => {
       }
       const randomReply = randomComment.replies[random(randomReplyLength)];
       const response = await request(server)
-        .post(`/reply/${randomReply.id}/like`)
+        .post(`/${API_VERSION}/reply/${randomReply.id}/like`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(201);
       const reply = response.body;

@@ -11,9 +11,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { Repository } from 'typeorm';
 import { ReplyEntity } from './reply.entity';
-import { ParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
 import { CreateReplyDTO } from './reply.dto';
 import { UserEntity } from '@src/user/user.entity';
+import { IReplyOutput } from './reply.interface';
 
 @Injectable()
 export class ReplyService {
@@ -29,6 +30,7 @@ export class ReplyService {
     // 'replies.parent.replier',
     // 'replies.likes',
   ];
+  private readonly table = 'reply';
 
   constructor(
     @InjectRepository(ReplyEntity)
@@ -36,27 +38,55 @@ export class ReplyService {
     private readonly commentService: CommentService,
   ) {}
 
+  /**
+   * @description 确保所有权
+   * @author Saxon
+   * @date 2020-03-14
+   * @param {UserEntity} user
+   * @param {ReplyEntity} reply
+   * @memberof ReplyService
+   */
   ensureOwnership(user: UserEntity, reply: ReplyEntity): void {
     if (reply.replier && (reply.replier.id as any) !== user.uuid) {
       throw new ForbiddenException('亲，不是您的回复无法操作');
     }
   }
 
-  async findOneByuuidForReply(
-    paramDTO: ParamDTO,
-    returnsUserEntity: boolean = false,
-  ) {
-    const { uuid } = paramDTO;
-    const reply = await this.replyRepository.findOne(
-      { uuid },
-      {
+  /**
+   * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
+   * @author Saxon
+   * @date 2020-03-14
+   * @param {UUIDParamDTO} paramDTO
+   * @param {boolean} [returnsEntity=false]
+   * @returns {(Promise<ReplyEntity | IReplyOutput>)}
+   * @memberof ReplyService
+   */
+  async findOneForReply(
+    paramDTO: UUIDParamDTO | IdParamDTO,
+    returnsEntity: boolean = false,
+  ): Promise<ReplyEntity | IReplyOutput> {
+    let reply: ReplyEntity;
+    if ((paramDTO as UUIDParamDTO).uuid) {
+      const { uuid } = <UUIDParamDTO>paramDTO;
+      reply = await this.replyRepository.findOne(
+        { uuid },
+        {
+          relations: this.relations,
+        },
+      );
+    } else if ((paramDTO as IdParamDTO).id) {
+      const { id } = <IdParamDTO>paramDTO;
+      reply = await this.replyRepository.findOne(id, {
         relations: this.relations,
-      },
-    );
+      });
+    } else {
+      throw new BadRequestException('亲，传入的参数不正确');
+    }
+
     if (!reply) {
       throw new NotFoundException('回复不存在');
     }
-    if (returnsUserEntity) {
+    if (returnsEntity) {
       return reply;
     }
     return reply.toResponseObject();
@@ -68,13 +98,16 @@ export class ReplyService {
    * @date 2020-03-14
    * @param {CreateReplyDTO} createReplyDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<IReplyOutput>}
    * @memberof ReplyService
    */
-  async create(createReplyDTO: CreateReplyDTO, user: UserEntity) {
+  async create(
+    createReplyDTO: CreateReplyDTO,
+    user: UserEntity,
+  ): Promise<IReplyOutput> {
     const { commentId, content, replyParentId } = createReplyDTO;
 
-    const comment = (await this.commentService.findOneByuuidForComment(
+    const comment = (await this.commentService.findOneForComment(
       { uuid: commentId },
       true,
     )) as CommentEntity;
@@ -83,7 +116,7 @@ export class ReplyService {
     creating.comment = comment;
     creating.replier = user;
     if (replyParentId) {
-      const replyParent = (await this.findOneByuuidForReply(
+      const replyParent = (await this.findOneForReply(
         { uuid: replyParentId },
         true,
       )) as ReplyEntity;
@@ -107,13 +140,14 @@ export class ReplyService {
    * @description 软删除，不检查数据库中是否存在实体
    * @author Saxon
    * @date 2020-03-14
-   * @param {ParamDTO} replyParamDTO
-   * @returns
+   * @param {UUIDParamDTO} paramDTO
+   * @param {UserEntity} user
+   * @returns {Promise<string>}
    * @memberof ReplyService
    */
-  async softDelete(replyParamDTO: ParamDTO, user: UserEntity) {
-    const { uuid } = replyParamDTO;
-    const reply = await this.findOneByuuidForReply(replyParamDTO) as ReplyEntity;
+  async softDelete(paramDTO: UUIDParamDTO, user: UserEntity): Promise<string> {
+    const { uuid } = paramDTO;
+    const reply = (await this.findOneForReply(paramDTO)) as ReplyEntity;
     this.ensureOwnership(user, reply);
 
     try {
@@ -132,13 +166,14 @@ export class ReplyService {
    * @description 恢复软删除的数据
    * @author Saxon
    * @date 2020-03-14
-   * @param {ParamDTO} replyParamDTO
-   * @returns
+   * @param {UUIDParamDTO} paramDTO
+   * @param {UserEntity} user
+   * @returns {Promise<string>}
    * @memberof ReplyService
    */
-  async softRestore(replyParamDTO: ParamDTO, user:UserEntity) {
-    const { uuid } = replyParamDTO;
-    const reply = await this.findOneByuuidForReply(replyParamDTO) as ReplyEntity;
+  async softRestore(paramDTO: UUIDParamDTO, user: UserEntity): Promise<string> {
+    const { uuid } = paramDTO;
+    const reply = (await this.findOneForReply(paramDTO)) as ReplyEntity;
     this.ensureOwnership(user, reply);
 
     try {
@@ -157,17 +192,14 @@ export class ReplyService {
    * @description 为回复点赞
    * @author Saxon
    * @date 2020-03-14
-   * @param {ParamDTO} replyParamDTO
+   * @param {UUIDParamDTO} paramDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<IReplyOutput>}
    * @memberof ReplyService
    */
-  async like(replyParamDTO: ParamDTO, user: UserEntity) {
-    const { uuid } = replyParamDTO;
-    const reply = (await this.findOneByuuidForReply(
-      { uuid },
-      true,
-    )) as ReplyEntity;
+  async like(paramDTO: UUIDParamDTO, user: UserEntity): Promise<IReplyOutput> {
+    const { uuid } = paramDTO;
+    const reply = (await this.findOneForReply({ uuid }, true)) as ReplyEntity;
     const likeOfCurrentUser: number = reply.likes.filter(v => v.id === user.id)
       .length;
 

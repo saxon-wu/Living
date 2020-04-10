@@ -3,14 +3,22 @@ import {
   Logger,
   InternalServerErrorException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentEntity } from './comment.entity';
 import { Repository } from 'typeorm';
-import { ParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
 import { CreateCommentDTO } from './comment.dto';
 import { ArticleService } from '@src/article/article.service';
 import { UserEntity } from '@src/user/user.entity';
+import { ArticleEntity } from '@src/article/article.entity';
+import { ICommentOutput } from './comment.interface';
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class CommentService {
@@ -22,6 +30,7 @@ export class CommentService {
     'replies.replier',
     'replies.likes',
   ];
+  private readonly table = 'comment';
 
   constructor(
     @InjectRepository(CommentEntity)
@@ -72,23 +81,33 @@ export class CommentService {
   /**
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
-   * @date 2020-03-12
-   * @param {ParamDTO} paramDTO
-   * @param {boolean} [returnsUserEntity=false]
-   * @returns
+   * @date 2020-03-13
+   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
+   * @param {boolean} [returnsEntity=false]
+   * @returns {(Promise<CommentEntity | ICommentOutput>)}
    * @memberof CommentService
    */
-  async findOneByuuidForComment(
-    paramDTO: ParamDTO,
-    returnsUserEntity: boolean = false,
-  ) {
-    const { uuid } = paramDTO;
-    const comment = await this.commentRepository.findOne(
-      { uuid },
-      {
+  async findOneForComment(
+    paramDTO: UUIDParamDTO | IdParamDTO,
+    returnsEntity: boolean = false,
+  ): Promise<CommentEntity | ICommentOutput> {
+    let comment: CommentEntity;
+    if ((paramDTO as UUIDParamDTO).uuid) {
+      const { uuid } = <UUIDParamDTO>paramDTO;
+      comment = await this.commentRepository.findOne(
+        { uuid },
+        {
+          relations: this.relations,
+        },
+      );
+    } else if ((paramDTO as IdParamDTO).id) {
+      const { id } = <IdParamDTO>paramDTO;
+      comment = await this.commentRepository.findOne(id, {
         relations: this.relations,
-      },
-    );
+      });
+    } else {
+      throw new BadRequestException('亲，传入的参数不正确');
+    }
 
     if (!comment) {
       throw new NotFoundException('评论不存在');
@@ -96,7 +115,7 @@ export class CommentService {
 
     this.parentChildRelation(comment.replies);
 
-    if (returnsUserEntity) {
+    if (returnsEntity) {
       return comment;
     }
     return comment.toResponseObject();
@@ -106,45 +125,94 @@ export class CommentService {
    * @description 查询所有评论
    * @author Saxon
    * @date 2020-03-13
-   * @param {ParamDTO} articleParamDTO
-   * @returns
+   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
+   * @param {IPaginationOptions} options
+   * @param {boolean} [isAdminSide=false]
+   * @returns {Promise<Pagination<ICommentOutput>>}
    * @memberof CommentService
    */
-  async findAll(articleParamDTO: ParamDTO) {
-    const { uuid } = articleParamDTO;
-    const article = await this.articleService.findOneByuuidForArticle(
-      { uuid },
-      true,
+  async findAll(
+    paramDTO: UUIDParamDTO | IdParamDTO,
+    options: IPaginationOptions,
+    isAdminSide: boolean = false,
+  ): Promise<Pagination<ICommentOutput>> {
+    const article = await this.articleService.findOneForArticle(
+      paramDTO,
+      /* returnsEntity */ true,
     );
-    const comment = await this.commentRepository.find({
-      relations: this.relations,
-    });
 
-    return comment.map(v => {
-      this.parentChildRelation(v.replies);
-      return v.toResponseObject();
-    });
+    const queryBuilder = this.commentRepository.createQueryBuilder(this.table);
+    for (const item of this.relations) {
+      const hasDot = item.includes('.');
+      queryBuilder.leftJoinAndSelect(
+        hasDot ? item : `${this.table}.${item}`,
+        hasDot ? item.replace(/\./, '_') : item,
+      );
+    }
+    /*
+    上面处理后类似如此：
+    queryBuilder.leftJoinAndSelect('comment.commenter', 'commenter');
+    queryBuilder.leftJoinAndSelect('comment.likes', 'likes');
+    queryBuilder.leftJoinAndSelect('comment.replies', 'replies');
+    queryBuilder.leftJoinAndSelect('replies.replier', 'replies_replier');
+    queryBuilder.leftJoinAndSelect('replies.likes', 'replies_likes');
+    */
+
+    const comments: Pagination<CommentEntity> = await paginate<CommentEntity>(
+      queryBuilder,
+      options,
+    );
+
+    if (isAdminSide) {
+      return {
+        ...comments,
+        items: comments.items.map(v => {
+          this.parentChildRelation(v.replies);
+          return v.toResponseObject(/**isAdminSide */ true);
+        }),
+      };
+    }
+
+    return {
+      ...comments,
+      items: comments.items.map(v => {
+        this.parentChildRelation(v.replies);
+        return v.toResponseObject();
+      }),
+    };
   }
 
-  async findOne(commentParamDto: ParamDTO) {
-    return await this.findOneByuuidForComment(commentParamDto);
+  /**
+   * @description 查询一条
+   * @author Saxon
+   * @date 2020-03-13
+   * @param {UUIDParamDTO} paramDTO
+   * @returns {(Promise<CommentEntity | ICommentOutput>)}
+   * @memberof CommentService
+   */
+  async findOne(
+    paramDTO: UUIDParamDTO,
+  ): Promise<CommentEntity | ICommentOutput> {
+    return await this.findOneForComment(paramDTO);
   }
 
   /**
    * @description 发表评论或回复评论
    * @author Saxon
-   * @date 2020-03-15
+   * @date 2020-03-13
    * @param {CreateCommentDTO} createOrRelyComment
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<ICommentOutput>}
    * @memberof CommentService
    */
-  async create(createOrRelyComment: CreateCommentDTO, user: UserEntity) {
+  async create(
+    createOrRelyComment: CreateCommentDTO,
+    user: UserEntity,
+  ): Promise<ICommentOutput> {
     const { content, articleId } = createOrRelyComment;
 
-    const article = await this.articleService.findOneByuuidForArticle(
-      { uuid: articleId },
-      true,
+    const article = <ArticleEntity>(
+      await this.articleService.findOneForArticle({ uuid: articleId }, true)
     );
 
     // 发表评论
@@ -163,16 +231,19 @@ export class CommentService {
   /**
    * @description 为评论或回复点赞
    * @author Saxon
-   * @date 2020-03-15
-   * @param {ParamDTO} commentParamDTO
+   * @date 2020-03-13
+   * @param {UUIDParamDTO} paramDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<ICommentOutput>}
    * @memberof CommentService
    */
-  async like(commentParamDTO: ParamDTO, user: UserEntity) {
+  async like(
+    paramDTO: UUIDParamDTO,
+    user: UserEntity,
+  ): Promise<ICommentOutput> {
     // 评论
-    const { uuid } = commentParamDTO;
-    const comment = (await this.findOneByuuidForComment(
+    const { uuid } = paramDTO;
+    const comment = (await this.findOneForComment(
       { uuid },
       true,
     )) as CommentEntity;

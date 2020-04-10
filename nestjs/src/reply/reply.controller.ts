@@ -8,11 +8,12 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ReplyService } from './reply.service';
-import { ParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { CreateReplyDTO } from './reply.dto';
 import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
 import { UserEntity } from '@src/user/user.entity';
+import { IReplyOutput } from './reply.interface';
 
 const MANY = 'replies';
 const ONE = 'reply';
@@ -26,25 +27,34 @@ export class ReplyController {
   async create(
     @Body() createReplyDTO: CreateReplyDTO,
     @User() user: UserEntity,
-  ) {
+  ): Promise<IReplyOutput> {
     return await this.replyService.create(createReplyDTO, user);
   }
 
   @UseGuards(AuthGuard)
   @Delete(`${ONE}/:uuid`)
-  async softDelete(@Param() replyParamDTO: ParamDTO, user: UserEntity) {
+  async softDelete(
+    @Param() replyParamDTO: UUIDParamDTO,
+    user: UserEntity,
+  ): Promise<string> {
     return await this.replyService.softDelete(replyParamDTO, user);
   }
 
   @UseGuards(AuthGuard)
   @Patch(`${ONE}/:uuid`)
-  async softRestore(@Param() replyParamDTO: ParamDTO, user: UserEntity) {
+  async softRestore(
+    @Param() replyParamDTO: UUIDParamDTO,
+    user: UserEntity,
+  ): Promise<string> {
     return await this.replyService.softRestore(replyParamDTO, user);
   }
 
   @UseGuards(AuthGuard)
   @Post(`${ONE}/:uuid/like`)
-  async like(@Param() replyParamDTO: ParamDTO, @User() user: UserEntity) {
+  async like(
+    @Param() replyParamDTO: UUIDParamDTO,
+    @User() user: UserEntity,
+  ): Promise<IReplyOutput> {
     return await this.replyService.like(replyParamDTO, user);
   }
 }

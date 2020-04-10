@@ -1,7 +1,7 @@
 import { IsUUID, IsInt, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer/decorators';
 
-export class ParamDTO {
+export class UUIDParamDTO {
   @IsUUID('4', {
     message: '亲，ID无效',
   })

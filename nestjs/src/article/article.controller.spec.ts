@@ -29,7 +29,7 @@ describe('Article Controller', () => {
     userController = module.get<UserController>(UserController);
 
     usersEntity = await userController.findAllForTest(
-      /*returnsUserEntity*/ true,
+      /*returnsEntity*/ true,
     );
 
     login = await authController.login({
@@ -150,7 +150,7 @@ describe('Article Controller', () => {
 
       // 重新获取用户，以防文章已软删除操作报“文章不存在”的情况
       usersEntity = await userController.findAllForTest(
-        /*returnsUserEntity*/ true,
+        /*returnsEntity*/ true,
       );
 
       // 指定的随机用户
@@ -190,7 +190,7 @@ describe('Article Controller', () => {
 
       // 重新获取用户，以防文章已软删除操作报“文章不存在”的情况
       usersEntity = await userController.findAllForTest(
-        /*returnsUserEntity*/ true,
+        /*returnsEntity*/ true,
       );
 
       // 指定的随机用户

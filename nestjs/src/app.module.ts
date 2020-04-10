@@ -35,7 +35,7 @@ import { ReplyModule } from './reply/reply.module';
     CommentModule,
     ReplyModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

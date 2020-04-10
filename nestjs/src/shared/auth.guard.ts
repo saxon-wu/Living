@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { UserService } from '@src/user/user.service';
-import { IdParamDTO, ParamDTO } from './shared.dto';
+import { IdParamDTO, UUIDParamDTO } from './shared.dto';
 import { Validator } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 
@@ -28,13 +28,13 @@ export class AuthGuard implements CanActivate {
     if (
       this.validator.isUUID(idOrUUID, this.configService.get('UUID_VERSION'))
     ) {
-      (param as ParamDTO).uuid = idOrUUID;
+      (param as UUIDParamDTO).uuid = idOrUUID;
     } else {
       (param as IdParamDTO).id = idOrUUID;
     }
 
     // request.user是内部使用的，所以findOneByuuidForUser返回UserEntity类型更方便，比如关联存储
-    request.user = await this.userService.findOneByuuidForUser(param, true);
+    request.user = await this.userService.findOneForUser(param, true);
     return true;
   }
 

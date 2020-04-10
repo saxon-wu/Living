@@ -1,10 +1,10 @@
 {
   "name": "nestjs",
   "version": "0.0.1",
-  "description": "",
+  "description": "Api server based on nestjs",
   "author": "Saxon",
   "private": true,
-  "license": "MIT",
+  "license": "Apache",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",

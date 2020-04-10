@@ -8,19 +8,25 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ArticleEntity, ArticleStatusEnum } from './article.entity';
+import { ArticleEntity } from './article.entity';
 import { Repository } from 'typeorm';
-import { CreateArticleDTO, UpdateArticleDTO, UpdateArticleDTOForAdmin } from './article.dto';
+import {
+  CreateArticleDTO,
+  UpdateArticleDTO,
+  UpdateArticleDTOForAdmin,
+} from './article.dto';
 import { validate } from 'class-validator';
-import { ParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
 import { UserService } from '@src/user/user.service';
 import { UserEntity } from '@src/user/user.entity';
-import { plainToClass } from 'class-transformer';
 import {
   paginate,
   Pagination,
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
+import { ArticleStatusEnum } from './article.enum';
+import { IArticleOutput } from './article.interface';
+import { IUserOutput } from '@src/user/user.interface';
 
 @Injectable()
 export class ArticleService {
@@ -40,6 +46,7 @@ export class ArticleService {
    * @date 2020-03-11
    * @private
    * @param {ArticleEntity} object
+   * @returns {Promise<void>}
    * @memberof ArticleService
    */
   private async validator(object: ArticleEntity): Promise<void> {
@@ -53,12 +60,12 @@ export class ArticleService {
    * @description 确保所有权
    * @author Saxon
    * @date 2020-03-15
-   * @param {*} user
+   * @param {UserEntity} user
    * @param {ArticleEntity} article
    * @memberof ArticleService
    */
   ensureOwnership(user: UserEntity, article: ArticleEntity): void {
-    if (article.publisher && (article.publisher.id as any) !== user.uuid) {
+    if (article.publisher && article.publisher.id !== user.id) {
       throw new ForbiddenException('亲，不是您的文章无法操作');
     }
   }
@@ -67,26 +74,26 @@ export class ArticleService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-12
-   * @param {(ParamDTO | IdParamDTO)} articleParamDTO
-   * @param {boolean} [returnsUserEntity=false]
-   * @returns
+   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
+   * @param {boolean} [returnsEntity=false]
+   * @returns {(Promise<ArticleEntity | IArticleOutput>)}
    * @memberof ArticleService
    */
-  async findOneByuuidForArticle(
-    articleParamDTO: ParamDTO | IdParamDTO,
-    returnsUserEntity: boolean = false,
-  ) {
+  async findOneForArticle(
+    paramDTO: UUIDParamDTO | IdParamDTO,
+    returnsEntity: boolean = false,
+  ): Promise<ArticleEntity | IArticleOutput> {
     let article: ArticleEntity;
-    if ((articleParamDTO as ParamDTO).uuid) {
-      const { uuid } = <ParamDTO>articleParamDTO;
+    if ((paramDTO as UUIDParamDTO).uuid) {
+      const { uuid } = <UUIDParamDTO>paramDTO;
       article = await this.articleRepository.findOne(
         { uuid },
         {
           relations: this.relations,
         },
       );
-    } else if ((articleParamDTO as IdParamDTO).id) {
-      const { id } = <IdParamDTO>articleParamDTO;
+    } else if ((paramDTO as IdParamDTO).id) {
+      const { id } = <IdParamDTO>paramDTO;
       article = await this.articleRepository.findOne(id, {
         relations: this.relations,
       });
@@ -97,7 +104,7 @@ export class ArticleService {
     if (!article) {
       throw new NotFoundException('文章不存在');
     }
-    if (returnsUserEntity) {
+    if (returnsEntity) {
       return article;
     }
     return article.toResponseObject();
@@ -107,10 +114,15 @@ export class ArticleService {
    * @description 查询所有
    * @author Saxon
    * @date 2020-03-11
-   * @returns
+   * @param {IPaginationOptions} options
+   * @param {boolean} [isAdminSide=false]
+   * @returns {Promise<Pagination<IArticleOutput>>}
    * @memberof ArticleService
    */
-  async findAll(options: IPaginationOptions) {
+  async findAll(
+    options: IPaginationOptions,
+    isAdminSide: boolean = false,
+  ): Promise<Pagination<IArticleOutput>> {
     const queryBuilder = this.articleRepository.createQueryBuilder(this.table);
     for (const item of this.relations) {
       queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
@@ -119,6 +131,14 @@ export class ArticleService {
       queryBuilder,
       options,
     );
+    if (isAdminSide) {
+      return {
+        ...articles,
+        items: articles.items.map(v =>
+          v.toResponseObject(/**isAdminSide */ true),
+        ),
+      };
+    }
     return {
       ...articles,
       items: articles.items.map(v => v.toResponseObject()),
@@ -129,12 +149,14 @@ export class ArticleService {
    * @description 查询一条
    * @author Saxon
    * @date 2020-03-11
-   * @param {ParamDTO} articleParamDTO
-   * @returns
+   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
+   * @returns {(Promise<ArticleEntity | IArticleOutput>)}
    * @memberof ArticleService
    */
-  async findOne(articleParamDTO: ParamDTO | IdParamDTO) {
-    return await this.findOneByuuidForArticle(articleParamDTO);
+  async findOne(
+    paramDTO: UUIDParamDTO | IdParamDTO,
+  ): Promise<ArticleEntity | IArticleOutput> {
+    return await this.findOneForArticle(paramDTO);
   }
 
   /**
@@ -143,10 +165,13 @@ export class ArticleService {
    * @date 2020-03-15
    * @param {CreateArticleDTO} articleDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<IArticleOutput>}
    * @memberof ArticleService
    */
-  async create(articleDTO: CreateArticleDTO, user: UserEntity) {
+  async create(
+    articleDTO: CreateArticleDTO,
+    user: UserEntity,
+  ): Promise<IArticleOutput> {
     const { title, content } = articleDTO;
     const article = await this.articleRepository.findOne({ title });
 
@@ -173,23 +198,23 @@ export class ArticleService {
    * @description 更新
    * @author Saxon
    * @date 2020-03-15
-   * @param {ParamDTO} articleParamDTO
+   * @param {UUIDParamDTO} paramDTO
    * @param {CreateArticleDTO} articleDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {(Promise<IArticleOutput | string>)}
    * @memberof ArticleService
    */
   async update(
-    articleParamDTO: ParamDTO,
+    paramDTO: UUIDParamDTO,
     articleDTO: CreateArticleDTO,
     user: UserEntity,
-  ) {
-    const { uuid } = articleParamDTO;
+  ): Promise<IArticleOutput | string> {
+    const { uuid } = paramDTO;
     const { title, content } = articleDTO;
     if (!title && !content) {
       throw new BadRequestException('亲，参数不可为空');
     }
-    const article = await this.findOneByuuidForArticle(articleParamDTO);
+    const article = <ArticleEntity>await this.findOneForArticle(paramDTO);
     this.ensureOwnership(user, article);
 
     if (
@@ -208,7 +233,7 @@ export class ArticleService {
       if (!updatingAticle.affected) {
         return '更新失败';
       }
-      return await this.findOneByuuidForArticle(articleParamDTO);
+      return <IArticleOutput>await this.findOneForArticle(paramDTO);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -218,15 +243,15 @@ export class ArticleService {
   /**
    * @description 软删除
    * @author Saxon
-   * @date 2020-03-15
-   * @param {ParamDTO} articleParamDTO
+   * @date 2020-04-10
+   * @param {UUIDParamDTO} paramDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<string>}
    * @memberof ArticleService
    */
-  async softDelete(articleParamDTO: ParamDTO, user: UserEntity) {
-    const { uuid } = articleParamDTO;
-    const article = await this.findOneByuuidForArticle(articleParamDTO);
+  async softDelete(paramDTO: UUIDParamDTO, user: UserEntity): Promise<string> {
+    const { uuid } = paramDTO;
+    const article = <ArticleEntity>await this.findOneForArticle(paramDTO);
     this.ensureOwnership(user, article);
 
     try {
@@ -248,12 +273,13 @@ export class ArticleService {
    * @description 恢复软删除的数据
    * @author Saxon
    * @date 2020-03-16
-   * @param {ParamDTO} articleParamDTO
-   * @returns
+   * @param {UUIDParamDTO} paramDTO
+   * @param {UserEntity} user
+   * @returns {Promise<string>}
    * @memberof ArticleService
    */
-  async softRestore(articleParamDTO: ParamDTO, user: UserEntity) {
-    const { uuid } = articleParamDTO;
+  async softRestore(paramDTO: UUIDParamDTO, user: UserEntity): Promise<string> {
+    const { uuid } = paramDTO;
 
     try {
       // 不检查数据库中是否存在实体
@@ -274,14 +300,17 @@ export class ArticleService {
    * @description 点赞
    * @author Saxon
    * @date 2020-03-15
-   * @param {ParamDTO} articleParamDTO
+   * @param {UUIDParamDTO} paramDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<IArticleOutput>}
    * @memberof ArticleService
    */
-  async like(articleParamDTO: ParamDTO, user: UserEntity) {
-    const { uuid } = articleParamDTO;
-    const article = await this.findOneByuuidForArticle({ uuid }, true);
+  async like(
+    paramDTO: UUIDParamDTO,
+    user: UserEntity,
+  ): Promise<IArticleOutput> {
+    const { uuid } = paramDTO;
+    const article = <ArticleEntity>await this.findOneForArticle({ uuid }, true);
     // 本用户对该文章的点赞数
     const likeOfCurrentUser: number = article.likes.filter(
       v => v.id === user.id,
@@ -305,16 +334,19 @@ export class ArticleService {
   /**
    * @description 收藏
    * @author Saxon
-   * @date 2020-03-15
-   * @param {ParamDTO} articleParamDTO
+   * @date 2020-04-10
+   * @param {UUIDParamDTO} paramDTO
    * @param {UserEntity} user
-   * @returns
+   * @returns {Promise<IUserOutput>}
    * @memberof ArticleService
    */
-  async bookmark(articleParamDTO: ParamDTO, user: UserEntity) {
-    const { uuid } = articleParamDTO;
-    const article = await this.findOneByuuidForArticle({ uuid }, true);
-    if (article.user?.id === user.id) {
+  async bookmark(
+    paramDTO: UUIDParamDTO,
+    user: UserEntity,
+  ): Promise<IUserOutput> {
+    const { uuid } = paramDTO;
+    const article = <ArticleEntity>await this.findOneForArticle({ uuid }, true);
+    if (article.publisher?.id === user.id) {
       throw new ForbiddenException('亲，这是您的文章嘢');
     }
     // 本用户对该文章的收藏数
@@ -340,45 +372,22 @@ export class ArticleService {
   /** ------------------------------------ADMIN------------------------------------------ */
 
   /**
-   * @description 查询所有[后台接口]
-   * @author Saxon
-   * @date 2020-04-01
-   * @param {IPaginationOptions} options
-   * @returns
-   * @memberof ArticleService
-   */
-  async findAllForAdmin(options: IPaginationOptions) {
-    const queryBuilder = this.articleRepository.createQueryBuilder(this.table);
-    for (const item of this.relations) {
-      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
-    }
-    const articles: Pagination<ArticleEntity> = await paginate<ArticleEntity>(
-      queryBuilder,
-      options,
-    );
-    return {
-      ...articles,
-      items: articles.items.map(v =>
-        v.toResponseObject(/**isAdminSide */ true),
-      ),
-    };
-  }
-
-  /**
    * @description 更新
    * @author Saxon
-   * @date 2020-04-01
+   * @date 2020-04-10
    * @param {IdParamDTO} idParamDTO
-   * @param {UpdateArticleDTO} articleDTO
-   * @returns
+   * @param {UpdateArticleDTOForAdmin} articleDTO
+   * @returns {(Promise<string | null>)}
    * @memberof ArticleService
    */
-  async updateForAdmin(idParamDTO: IdParamDTO, articleDTO: UpdateArticleDTOForAdmin) {
+  async updateForAdmin(
+    idParamDTO: IdParamDTO,
+    articleDTO: UpdateArticleDTOForAdmin,
+  ): Promise<string | null> {
     const { id } = idParamDTO;
     const { status } = articleDTO;
-    const article: ArticleEntity = await this.findOneByuuidForArticle(
-      idParamDTO,
-      /* returnsUserEntity */ true,
+    const article = <ArticleEntity>(
+      await this.findOneForArticle(idParamDTO, /* returnsEntity */ true)
     );
 
     switch (status) {

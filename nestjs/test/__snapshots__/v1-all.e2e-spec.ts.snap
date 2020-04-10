@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`测试完整流程 随机用户登录 /auth/login (POST) 1`] = `
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 1`] = `
 Object {
   "accessToken": Any<String>,
   "expiresIn": Any<Number>,

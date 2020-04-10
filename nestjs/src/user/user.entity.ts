@@ -13,16 +13,11 @@ import * as jwt from 'jsonwebtoken';
 import { ArticleEntity } from '@src/article/article.entity';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
-
-interface ITokenResponseObject {
-  readonly accessToken: string;
-  readonly expiresIn: string | number;
-}
-
-export enum UserStatusEnum {
-  NORMAL = 'Normal',
-  DISABLED = 'Disabled',
-}
+import {
+  IAccessTokenOutput,
+  IUserOutput,
+} from '@src/user/user.interface';
+import { UserStatusEnum } from './user.enum';
 
 @Entity('user')
 export class UserEntity extends SharedEntity {
@@ -50,7 +45,7 @@ export class UserEntity extends SharedEntity {
     type: 'enum',
     enum: UserStatusEnum,
     default: UserStatusEnum.NORMAL,
-    comment: '封号: 不可登录'
+    comment: '封号: 不可登录',
   })
   status: UserStatusEnum;
 
@@ -140,10 +135,10 @@ export class UserEntity extends SharedEntity {
    * @description 创建token
    * @readonly
    * @private
-   * @type {ITokenResponseObject}
+   * @type {IAccessTokenOutput}
    * @memberof UserEntity
    */
-  private get tokenObject(): ITokenResponseObject {
+  private get tokenObject(): IAccessTokenOutput {
     const { uuid, username } = this;
     // JWT_EXPIRATION_IN环境变量取到的是字符串，Eg: '60', "2 days", "10h", "7d", 其中字符串中是纯数字必须转成number类型，否则会报token过期
     let expiresIn: number | string = process.env.JWT_EXPIRATION_IN;
@@ -170,7 +165,10 @@ export class UserEntity extends SharedEntity {
    * @returns
    * @memberof UserEntity
    */
-  toResponseObject(isAdminSide: boolean = false, showToken: boolean = false) {
+  toResponseObject(
+    isAdminSide: boolean = false,
+    showToken: boolean = false,
+  ): IUserOutput {
     const {
       id,
       uuid,
@@ -183,6 +181,7 @@ export class UserEntity extends SharedEntity {
       tokenObject,
       status,
     } = this;
+    
     const common = {
       username,
       bookmarks: bookmarks?.map(v => v.toResponseObject()),

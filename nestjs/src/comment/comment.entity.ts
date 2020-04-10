@@ -11,6 +11,7 @@ import { UserEntity } from '@src/user/user.entity';
 import { ArticleEntity } from '@src/article/article.entity';
 import { ReplyEntity } from '@src/reply/reply.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
+import { ICommentOutput } from './comment.interface';
 
 @Entity('comment')
 export class CommentEntity extends SharedEntity {
@@ -81,7 +82,7 @@ export class CommentEntity extends SharedEntity {
    * @returns
    * @memberof CommentEntity
    */
-  toResponseObject(isAdminSide: boolean = false) {
+  toResponseObject(isAdminSide: boolean = false): ICommentOutput {
     const {
       id,
       uuid,

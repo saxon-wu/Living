@@ -11,7 +11,7 @@ import {
 import { UserService } from './user.service';
 import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
-import { ParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
 import { UserEntity } from './user.entity';
 import { UpdateUserDTO } from './user.dto';
 
@@ -31,7 +31,7 @@ export class AdminUserController {
     // nestjs 7.0 自动转换number,bool未传时则为NaN,false
     if (isNaN(page)) page = 1;
     if (isNaN(limit)) limit = 10;
-    return await this.userService.findAllForAdmin({ page, limit });
+    return await this.userService.findAll({ page, limit }, true);
   }
 
   @Get(`${ONE}/:id`)

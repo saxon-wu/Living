@@ -9,6 +9,7 @@ import {
 import { CommentEntity } from '@src/comment/comment.entity';
 import { UserEntity } from '@src/user/user.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
+import { IReplyOutput } from './reply.interface';
 
 @Entity('reply')
 export class ReplyEntity extends SharedEntity {
@@ -79,7 +80,7 @@ export class ReplyEntity extends SharedEntity {
    * @returns
    * @memberof ReplyEntity
    */
-  toResponseObject(isAdminSide: boolean = false) {
+  toResponseObject(isAdminSide: boolean = false): IReplyOutput {
     const { id, uuid, createdAt, updatedAt, replier, likes, content } = this;
     const common = {
       content,

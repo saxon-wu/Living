@@ -7,11 +7,12 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
-import { ParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { UserEntity } from './user.entity';
 
 const MANY = 'users';
@@ -22,25 +23,31 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get(MANY)
-  async findAll() {
-    return await this.userService.findAll();
+  async findAll(
+    @Query('current') page: number = 1,
+    @Query('pageSize') limit: number = 10,
+  ) {
+    // nestjs 7.0 自动转换number,bool未传时则为NaN,false
+    if (isNaN(page)) page = 1;
+    if (isNaN(limit)) limit = 10;
+    return await this.userService.findAll({ page, limit });
   }
 
   @Get(`${ONE}/:uuid`)
-  async findOne(@Param() paramDTO: ParamDTO) {
+  async findOne(@Param() paramDTO: UUIDParamDTO) {
     return await this.userService.findOne(paramDTO);
   }
 
-  // TODO: test时调用
-  async findOneForTest(paramDTO: ParamDTO): Promise<UserEntity> {
-    return await this.userService.findOneByuuidForUser(paramDTO, true);
-  }
-  // TODO: test时调用
-  async findAllForTest(
-    returnsUserEntity: boolean = false,
-  ): Promise<UserEntity[] | any> {
-    return await this.userService.findAll(returnsUserEntity);
-  }
+  // // TODO: test时调用
+  // async findOneForTest(paramDTO: UUIDParamDTO): Promise<UserEntity> {
+  //   return <UserEntity>await this.userService.findOneForUser(paramDTO, true);
+  // }
+  // // TODO: test时调用
+  // async findAllForTest(
+  //   returnsEntity: boolean = false,
+  // ): Promise<UserEntity[] | any> {
+  //   return await this.userService.findAll(returnsEntity);
+  // }
 
   @UseGuards(AuthGuard)
   @Delete(`${ONE}/destruct`)
