@@ -52,5 +52,7 @@ export default {
   'menu.user': '用户管理',
   'menu.user.list': '列表',
   'menu.article': '文章管理',
-  'menu.article.list': '列表'
+  'menu.article.list': '列表',
+  'menu.tag': '标签管理',
+  'menu.tag.list': '列表'
 };

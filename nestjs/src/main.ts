@@ -13,7 +13,7 @@ async function bootstrap() {
 
   // // 允许跨域资源共享
   app.enableCors({
-    origin: ['http://localhost:8000', 'http://localhost']
+    origin: ['http://localhost:8000', 'http://localhost:8001', 'http://localhost:80']
   });
 
   // somewhere in your initialization file

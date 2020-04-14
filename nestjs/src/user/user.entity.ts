@@ -13,10 +13,7 @@ import * as jwt from 'jsonwebtoken';
 import { ArticleEntity } from '@src/article/article.entity';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
-import {
-  IAccessTokenOutput,
-  IUserOutput,
-} from '@src/user/user.interface';
+import { IAccessTokenOutput, IUserOutput } from '@src/user/user.interface';
 import { UserStatusEnum } from './user.enum';
 
 @Entity('user')
@@ -181,15 +178,15 @@ export class UserEntity extends SharedEntity {
       tokenObject,
       status,
     } = this;
-    
+
     const common = {
       username,
-      bookmarks: bookmarks?.map(v => v.toResponseObject()),
-      bookmarksCount: bookmarks?.length,
-      articles: articles?.map(v => v.toResponseObject()),
-      articlesCount: articles?.length,
-      likeArticles: likeArticles?.map(v => v.toResponseObject()),
-      likeArticlesCount: likeArticles?.length,
+      bookmarks: bookmarks?.map(v => v.toResponseObject()) || null,
+      bookmarksCount: bookmarks?.length || 0,
+      articles: articles?.map(v => v.toResponseObject()) || null,
+      articlesCount: articles?.length || 0,
+      likeArticles: likeArticles?.map(v => v.toResponseObject()) || null,
+      likeArticlesCount: likeArticles?.length || 0,
     };
     if (isAdminSide) {
       return {

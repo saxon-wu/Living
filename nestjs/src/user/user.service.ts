@@ -146,10 +146,10 @@ export class UserService {
    */
   async destroy(user: UserEntity): Promise<string> {
     const { uuid } = user;
-    await this.findOneForUser({ uuid });
+    const _user = await this.findOneForUser({ uuid });
 
     try {
-      const destroyingUser = await this.userRepository.delete({ uuid });
+      const destroyingUser = await this.userRepository.delete(_user.id);
       if (!destroyingUser.affected) {
         return '注销账号失败';
       }

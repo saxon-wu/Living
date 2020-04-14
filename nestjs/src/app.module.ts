@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CommentModule } from './comment/comment.module';
 import { ReplyModule } from './reply/reply.module';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ReplyModule } from './reply/reply.module';
     AuthModule,
     CommentModule,
     ReplyModule,
+    TagModule,
   ],
   controllers: [],
   providers: [],

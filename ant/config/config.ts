@@ -105,6 +105,19 @@ export default defineConfig({
               ]
             },
             {
+              path: '/tag',
+              name: 'tag',
+              icon: 'smile',
+              routes: [
+                {
+                  name: 'list',
+                  // icon: 'list',
+                  path: '/tag/list',
+                  component: './tag/list'
+                }
+              ]
+            },
+            {
               component: './404',
             },
           ],

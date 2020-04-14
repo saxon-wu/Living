@@ -38,11 +38,19 @@ export class TransformInterceptor implements NestInterceptor {
     }
     return next.handle().pipe(
       map((data: any) => {
+        // 当data是string类型，说明是提示信息，应当交给message
+        let result: any;
+        if (typeof data === 'string') {
+          message = data;
+          result = null;
+        } else {
+          result = classToPlain(data);
+        }
         const obj = {
           statusCode: 0,
           responseTime: `${Date.now() - now}ms`,
           message,
-          result: classToPlain(data),
+          result,
         };
         if (data?.message) {
           obj.message = data.message;

@@ -52,5 +52,7 @@ export default {
   'menu.user': 'User Management',
   'menu.user.list': 'List',
   'menu.article': 'Arcicle Management',
-  'menu.article.list': 'List'
+  'menu.article.list': 'List',
+  'menu.tag': 'Tag Management',
+  'menu.tag.list': 'List'
 };

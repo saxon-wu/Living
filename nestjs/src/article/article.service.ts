@@ -176,7 +176,8 @@ export class ArticleService {
     const article = await this.articleRepository.findOne({ title });
 
     // 60 seconds 内不可重复提交
-    if (article?.createdAt.getTime() + 60 * 1000 > Date.now()) {
+    const timestamp = new Date(article.createdAt).valueOf();
+    if (timestamp + 60 * 1000 > Date.now()) {
       throw new ConflictException(
         '亲，系统阻止了，请确认是否重复提交，1分钟后可再次提交',
       );

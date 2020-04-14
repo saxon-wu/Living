@@ -8,12 +8,12 @@ export interface LoginParamsType {
 }
 
 export async function accountLogin(params: LoginParamsType) {
-  return request('/auth/login', {
+  return await request('/auth/login', {
     method: 'POST',
     data: params,
   });
 }
 
 export async function getFakeCaptcha(mobile: string) {
-  return request(`/api/login/captcha?mobile=${mobile}`);
+  return await request(`/api/login/captcha?mobile=${mobile}`);
 }

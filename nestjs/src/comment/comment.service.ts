@@ -46,7 +46,7 @@ export class CommentService {
    * @param {any[]} data
    * @memberof CommentService
    */
-  parentChildRelation(data: any[]) {
+  private parentChildRelation(data: any[]) {
     for (const child of data) {
       for (const parent of data) {
         if (child.parentId === parent.id) {

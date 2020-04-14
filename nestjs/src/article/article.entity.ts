@@ -13,6 +13,7 @@ import { CommentEntity } from '@src/comment/comment.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
 import { ArticleStatusEnum } from './article.enum';
 import { IArticleOutput } from './article.interface';
+import { TagEntity } from '@src/tag/tag.entity';
 
 @Entity('article')
 export class ArticleEntity extends SharedEntity {
@@ -93,6 +94,17 @@ export class ArticleEntity extends SharedEntity {
     comment => comment.article,
   )
   comments: CommentEntity[];
+
+  /**
+   * @description 文章属于标签
+   * @type {TagEntity[]}
+   * @memberof ArticleEntity
+   */
+  @ManyToMany(
+    type => TagEntity,
+    tag => tag.articles,
+  )
+  tags: TagEntity[];
 
   /**
    * @description 返回对象
