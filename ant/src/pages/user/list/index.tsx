@@ -102,10 +102,10 @@ const UserList: React.FC<IUserListProps> = ({ updateUserFromModel }) => {
         request={async (params = {}) => {
           const response = await queryUsersService(params as IPagination);
           return {
-            data: response.result.items,
+            data: response.results.items,
             page: params.current,
             success: true,
-            total: response.result.meta.totalItems,
+            total: response.results.meta.totalItems,
           };
         }}
         columns={columns}

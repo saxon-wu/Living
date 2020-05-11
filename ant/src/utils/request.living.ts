@@ -51,6 +51,19 @@ const errorHandler = (error: { response: Response }): Response => {
   return response;
 };
 
+// const errorHandler = error => {
+//   const {response} = error
+
+//   if (!response) {
+//       notification.error({
+//           description: '您的网络发生异常，无法连接服务器',
+//           message: '网络异常',
+//       })
+//   }
+
+//   return response
+// }
+
 /**
  * 配置request请求时的默认参数
  */

@@ -34,7 +34,7 @@ const TagModel: ITagModel = {
       const response = yield call(queryTagsService);
       yield put({
         type: 'saveTags',
-        payload: response?.result,
+        payload: response?.results,
       });
     },
     *createTagModel({ payload, callback }, { call, put }) {

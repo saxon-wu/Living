@@ -41,7 +41,7 @@ const Model: LoginModelType = {
       });
       // Login successfully
       if (response.statusCode === 0) {
-        setAccessToken(response.result.accessToken);
+        setAccessToken(response.results.accessToken);
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
         let { redirect } = params as { redirect: string };

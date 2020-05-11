@@ -30,14 +30,14 @@ const UserModel: IUserModel = {
       const response = yield call(queryWhoamiService);
       yield put({
         type: 'saveCurrentUser',
-        payload: response?.result,
+        payload: response?.results,
       });
     },
     *fetchUsersModel(_, { call, put }) {
       const response = yield call(queryUsersService);
       yield put({
         type: 'saveUsers',
-        payload: response?.result,
+        payload: response?.results,
       });
     },
     *updateUserModel({ payload, callback }, { call, put }) {

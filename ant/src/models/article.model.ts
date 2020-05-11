@@ -27,7 +27,7 @@ const ArticleModel: IArticleModel = {
       const response = yield call(queryArticlesService);
       yield put({
         type: 'saveArticles',
-        payload: response?.result,
+        payload: response?.results,
       });
     },
     *updateArticleModel({ payload, callback }, { call, put }) {
