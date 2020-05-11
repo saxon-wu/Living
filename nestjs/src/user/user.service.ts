@@ -114,6 +114,7 @@ export class UserService {
     for (const item of transformRelations(this.table, this.relations)) {
       queryBuilder.leftJoinAndSelect(item.property, item.alias);
     }
+
     const users: Pagination<UserEntity> = await paginate<UserEntity>(
       queryBuilder,
       options,

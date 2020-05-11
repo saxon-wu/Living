@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import cn from "classnames";
+import classnames from "classnames";
 
 const containerVariants = {
   initial: { scale: 0.96, y: 30, opacity: 0 },
@@ -36,7 +36,7 @@ const Container: React.FunctionComponent<Props> = ({
     >
       <motion.div
         variants={containerVariants}
-        className={cn(`${className}`, {
+        className={classnames(`${className}`, {
           "container mx-auto px-5": !full,
         })}
       >

@@ -46,8 +46,8 @@ export class AdminUserController {
 
   @Get(`${ONE}/whoami/x`)
   async whoami(@User() user: UserEntity) {
-    const { uuid } = user;
-    return await this.userService.findOne({ uuid });
+    const { id } = user;
+    return await this.userService.findOne({ id }, /* returnsEntity */ true);
   }
 
   

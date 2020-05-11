@@ -23,9 +23,4 @@ cd living/blog
 
 npm install
 npm run dev
-
-# or
-
-yarn install
-yarn dev
 ```

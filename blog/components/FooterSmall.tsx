@@ -1,4 +1,4 @@
-import cn from "classnames";
+import classnames from "classnames";
 
 type Props = {
   absolute: boolean;
@@ -8,7 +8,7 @@ const FooterSmall: React.FunctionComponent<Props> = ({ absolute }) => {
   return (
     <>
       <footer
-        className={cn("pb-6", {
+        className={classnames("pb-6", {
           "absolute w-full bottom-0 bg-gray-900": absolute,
           relative: !absolute,
         })}

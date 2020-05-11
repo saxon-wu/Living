@@ -10,6 +10,11 @@ import { BaseContext } from "next/dist/next-server/lib/utils";
 import { LIVING_ACCESS_TOKEN, LIVING_USER } from "./contants";
 import store from "store2";
 
+const APP_URL_PREFIX = process.env.APP_URL_PREFIX;
+if (!APP_URL_PREFIX?.includes("http")) {
+  throw new Error("Missing the.env or .env.development file, see README.md");
+}
+
 /**
  * 配置request请求时的默认参数
  */

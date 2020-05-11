@@ -27,25 +27,25 @@ services:
   #     - 80:80
   #     - 443:443
 
-  # living-ant-nginx:
+  # living-antd-nginx:
   #   image: nginx:1.17.9-alpine
-  #   container_name: living-ant-nginx
+  #   container_name: living-antd-nginx
   #   volumes:
-  #     - $PWD/ant/dist:/usr/share/nginx/html
+  #     - $PWD/antd/dist:/usr/share/nginx/html
   #     - $PWD/docker-data/nginx/logs:/var/log/nginx
   #     - $PWD/docker-data/nginx/conf.d:/etc/nginx/conf.d
   #     - $PWD/docker-data/nginx/nginx.conf:/etc/nginx/nginx.conf
   #   restart: on-failure
   #   # depends_on:
-  #   # - living-ant
+  #   # - living-antd
   #   ports:
   #     - 7000:80
 
-  # living-ant:
+  # living-antd:
   #   build:
-  #     context: ./ant
-  #     dockerfile: $PWD/ant/Dockerfile
-  #   container_name: living-ant
+  #     context: ./antd
+  #     dockerfile: $PWD/antd/Dockerfile
+  #   container_name: living-antd
   #   environment:
   #     - API_URL=http://app.dev/api/
   #     # - API_URL_BROWSER=/api
@@ -56,7 +56,7 @@ services:
   #     # - REACT_APP_ENV=dev
   #     # - MOCK=none
   #   volumes:
-  #     - $PWD/ant:/app
+  #     - $PWD/antd:/app
   #     # - /app/node_modules/
   #   restart: on-failure
   #   ports:

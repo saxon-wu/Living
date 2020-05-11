@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useContext } from "react";
 import { queryWhoamiUserService } from "../lib/services/user.service";
 import UserContext from "./UserContext";
-import cn from "classnames";
+import classnames from "classnames";
 import { AVATAR_SM, LIVING_THEME } from "../lib/contants";
 import { motion } from "framer-motion";
 import store from "store2";
@@ -41,7 +41,7 @@ const Navbar: React.FunctionComponent<Props> = ({ transparent }) => {
 
   return (
     <nav
-      className={cn(
+      className={classnames(
         "flex flex-wrap items-center justify-between px-2 py-3 navbar-expand-lg z-50 w-full",
         {
           "top-0 absolute bg-transparent": transparent,
@@ -74,9 +74,9 @@ const Navbar: React.FunctionComponent<Props> = ({ transparent }) => {
          Living
         </span> */}
       </div>
-      <div className={cn("block flex-grow flex items-center w-auto")}>
+      <div className={classnames("block flex-grow flex items-center w-auto")}>
         <ul
-          className={cn("text-sm flex-grow", {
+          className={classnames("text-sm flex-grow", {
             "text-white": transparent,
             "text-gray-800": !transparent,
           })}
@@ -118,7 +118,7 @@ const Navbar: React.FunctionComponent<Props> = ({ transparent }) => {
           </li>
         </ul>
         <div
-          className={cn("flex justify-start items-center pr-10", {
+          className={classnames("flex justify-start items-center pr-10", {
             "text-white": transparent,
             "text-gray-800": !transparent,
           })}
