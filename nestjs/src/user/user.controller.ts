@@ -14,6 +14,7 @@ import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
 import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { UserEntity } from './user.entity';
+import { UpdateUserDTO } from './user.dto';
 
 const MANY = 'users';
 const ONE = 'user';
@@ -56,9 +57,15 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Post(`${ONE}/whoami`)
+  @Get(`${ONE}/whoami/x`)
   async whoami(@User() user: UserEntity) {
     const { uuid } = user;
     return await this.userService.findOne({ uuid });
+  }
+
+  @UseGuards(AuthGuard)
+  @Put(`${ONE}/update`)
+  async update(@Body() updateUserDTO: UpdateUserDTO, @User() user: UserEntity) {
+    return this.userService.update(updateUserDTO, user);
   }
 }

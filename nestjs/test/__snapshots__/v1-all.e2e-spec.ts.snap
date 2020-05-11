@@ -1,10 +1,1651 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 1`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 2`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 3`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 4`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 5`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 6`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 7`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 8`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 9`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 注册用户 /v1/auth/register (POST) 10`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
 exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 1`] = `
 Object {
   "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
   "expiresIn": Any<Number>,
   "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 2`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 3`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 4`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 5`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 6`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 7`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 8`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 9`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 10`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 11`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 12`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 13`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 14`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 15`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 16`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 17`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 18`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 19`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 20`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 21`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 22`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 23`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 24`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 25`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 26`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 27`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 28`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 29`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 30`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 31`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 32`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 33`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 34`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 35`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 36`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 37`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 38`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 39`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 40`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 41`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 42`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 43`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 44`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 45`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 46`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 47`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 48`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 49`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 50`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 51`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 52`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 53`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 54`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 55`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 56`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 57`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 58`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 59`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 60`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 61`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 62`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 63`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 64`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 65`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 66`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 67`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 68`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 69`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 70`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 71`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 72`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 73`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 74`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 75`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 76`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 77`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 78`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 79`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 80`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 81`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 82`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 83`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 84`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 85`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 86`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 87`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 88`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 89`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 90`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 91`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 92`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 93`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 94`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 95`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 96`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 97`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 98`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 99`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
+  "username": Any<String>,
+}
+`;
+
+exports[`测试完整流程 随机用户登录 /v1/auth/login (POST) 100`] = `
+Object {
+  "accessToken": Any<String>,
+  "articles": null,
+  "articlesCount": 0,
+  "bookmarks": null,
+  "bookmarksCount": 0,
+  "expiresIn": Any<Number>,
+  "id": Any<String>,
+  "likeArticles": null,
+  "likeArticlesCount": 0,
   "username": Any<String>,
 }
 `;

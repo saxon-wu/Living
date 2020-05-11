@@ -29,7 +29,9 @@ export class AuthService {
    */
   async login(loginDTO: LoginDTO) {
     const { username, password } = loginDTO;
-    const user = await this.userRepository.findOne({ username });
+    const user = await this.userRepository.findOne({ username }, {
+      relations: ['avatar']
+    });
     if (!user || !user.comparePassword(password)) {
       throw new UnauthorizedException('亲，用户或密码不正确');
     }

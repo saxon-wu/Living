@@ -164,3 +164,48 @@ export function isValidDate(date: Date | number): boolean {
 export function isDevelopment(): boolean {
   return process.env.NODE_ENV === 'development';
 }
+
+/**
+ * @description 转换关联给SelectQueryBuilder使用
+ * @author Saxon
+ * @date 2020-05-03
+ * @export
+ * @param {string} tableName
+ * @param {string[]} relations 
+ * 转换前
+ * [
+    'commenter',
+    'likes',
+    'replies',
+    'replies.likes',
+    'replies.replier',
+    'replies.replier.avatar',
+  ];
+ * @returns
+ 转换后
+  [
+    { property: 'comment.commenter', alias: 'comment_commenter' },
+    { property: 'comment.likes', alias: 'comment_likes' },
+    { property: 'comment.replies', alias: 'comment_replies' },
+    { property: 'comment_replies.likes', alias: 'comment_replies_likes' },
+    { property: 'comment_replies.replier', alias: 'comment_replies_replier' },
+    { property: 'comment_replies_replier.avatar', alias: 'comment_replies_replier_avatar', },
+  ];
+ */
+export function transformRelations(tableName: string, relations: string[]) {
+  // splice会改变原数组，slice不会改变原数组
+  return relations.map(v => {
+    const subArray = v.split('.');
+    const property =
+      subArray.length === 1
+        ? `${tableName}.${v}`
+        : `${tableName}_${subArray
+            .splice(0, subArray.length - 1)
+            .join('_')}.${subArray.splice(-1)}`;
+    const alias = `${tableName}_${v.replace(/\./g, '_')}`;
+    return {
+      property,
+      alias,
+    };
+  });
+}

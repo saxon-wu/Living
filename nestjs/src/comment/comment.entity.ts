@@ -6,6 +6,7 @@ import {
   JoinTable,
   OneToMany,
   JoinColumn,
+  RelationCount,
 } from 'typeorm';
 import { UserEntity } from '@src/user/user.entity';
 import { ArticleEntity } from '@src/article/article.entity';
@@ -63,6 +64,9 @@ export class CommentEntity extends SharedEntity {
   })
   likes: UserEntity[];
 
+  @RelationCount((commentEntity: CommentEntity) => commentEntity.likes)
+  likesCount: number;
+
   /**
    * @description 回复的”回复“
    * @type {ReplyEntity[]}
@@ -73,6 +77,11 @@ export class CommentEntity extends SharedEntity {
     reply => reply.comment,
   )
   replies: ReplyEntity[];
+
+  @RelationCount((commentEntity: CommentEntity) => commentEntity.replies)
+  repliesCount: number;
+
+  isOwnership: boolean = false;
 
   /**
    * @description 返回对象
@@ -92,20 +101,24 @@ export class CommentEntity extends SharedEntity {
       commenter,
       likes,
       replies,
+      isOwnership,
+      likesCount,
+      repliesCount,
     } = this;
     const common = {
       content,
+      createdAt,
+      isOwnership,
       commenter: commenter?.toResponseObject() || null,
       likes: likes?.map(v => v.toResponseObject()) || null,
-      likesCount: likes?.length || 0,
       replies: replies?.map(v => v.toResponseObject()) || null,
-      repliesCount: replies?.length || 0,
+      likesCount,
+      repliesCount,
     };
     if (isAdminSide) {
       return {
         id,
         uuid,
-        createdAt,
         updatedAt,
         ...common,
       };

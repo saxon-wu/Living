@@ -1,7 +1,9 @@
-import { IsNotEmpty, IsString, IsUUID, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, IsOptional, UUIDVersion } from 'class-validator';
 
 export class CreateReplyDTO {
-  @IsUUID()
+  @IsUUID(process.env.UUID_VERSION as UUIDVersion, {
+    message: '亲，无效的commentId',
+  })
   @IsNotEmpty()
   commentId: string;
 
@@ -9,7 +11,9 @@ export class CreateReplyDTO {
   @IsNotEmpty()
   content: string;
 
-  @IsUUID()
+  @IsUUID(process.env.UUID_VERSION as UUIDVersion, {
+    message: '亲，无效的replyParentId',
+  })
   @IsNotEmpty()
   @IsOptional()
   replyParentId?: string;

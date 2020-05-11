@@ -19,16 +19,20 @@ import {
   Pagination,
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
+import { transformRelations } from '@src/shared/helper.util';
+import { SortEnum } from '@src/shared/shared.enum';
 
 @Injectable()
 export class CommentService {
   private readonly logger: Logger = new Logger(CommentService.name);
   private readonly relations = [
     'commenter',
+    'commenter.avatar',
     'likes',
     'replies',
-    'replies.replier',
     'replies.likes',
+    'replies.replier',
+    'replies.replier.avatar',
   ];
   private readonly table = 'comment';
 
@@ -46,12 +50,18 @@ export class CommentService {
    * @param {any[]} data
    * @memberof CommentService
    */
-  private parentChildRelation(data: any[]) {
+  private parentChildRelationship(data: any[], article?: ArticleEntity) {
     for (const child of data) {
+      if (article && child.replier.id === article.publisher.id) {
+        child.isOwnership = true;
+      }
       for (const parent of data) {
         if (child.parentId === parent.id) {
           const parentReplierUsername = parent.replier?.username;
-          child.content = `回复@${parentReplierUsername}: ${child.content} {${parentReplierUsername} ${parent.content}}`;
+          // 引入原话
+          // child.content = `回复@${parentReplierUsername}: ${child.content} {${parentReplierUsername} ${parent.content}}`;
+          // 不引入原话
+          child.content = `回复@${parentReplierUsername}: ${child.content}`;
         }
       }
     }
@@ -113,7 +123,7 @@ export class CommentService {
       throw new NotFoundException('评论不存在');
     }
 
-    this.parentChildRelation(comment.replies);
+    this.parentChildRelationship(comment.replies);
 
     if (returnsEntity) {
       return comment;
@@ -134,29 +144,23 @@ export class CommentService {
   async findAll(
     paramDTO: UUIDParamDTO | IdParamDTO,
     options: IPaginationOptions,
+    sort: SortEnum,
     isAdminSide: boolean = false,
   ): Promise<Pagination<ICommentOutput>> {
-    const article = await this.articleService.findOneForArticle(
-      paramDTO,
-      /* returnsEntity */ true,
+    const article = <ArticleEntity>(
+      await this.articleService.findOneForArticle(
+        paramDTO,
+        /* returnsEntity */ true,
+      )
     );
 
     const queryBuilder = this.commentRepository.createQueryBuilder(this.table);
-    for (const item of this.relations) {
-      const hasDot = item.includes('.');
-      queryBuilder.leftJoinAndSelect(
-        hasDot ? item : `${this.table}.${item}`,
-        hasDot ? item.replace(/\./, '_') : item,
-      );
+    queryBuilder.where(`article_id=${article.id}`);
+    queryBuilder.orderBy(`${this.table}.createdAt`, sort);
+
+    for (const item of transformRelations(this.table, this.relations)) {
+      queryBuilder.leftJoinAndSelect(item.property, item.alias);
     }
-    /*
-    上面处理后类似如此：
-    queryBuilder.leftJoinAndSelect('comment.commenter', 'commenter');
-    queryBuilder.leftJoinAndSelect('comment.likes', 'likes');
-    queryBuilder.leftJoinAndSelect('comment.replies', 'replies');
-    queryBuilder.leftJoinAndSelect('replies.replier', 'replies_replier');
-    queryBuilder.leftJoinAndSelect('replies.likes', 'replies_likes');
-    */
 
     const comments: Pagination<CommentEntity> = await paginate<CommentEntity>(
       queryBuilder,
@@ -167,7 +171,10 @@ export class CommentService {
       return {
         ...comments,
         items: comments.items.map(v => {
-          this.parentChildRelation(v.replies);
+          if (v.commenter.id === article.publisher.id) {
+            v.isOwnership = true;
+          }
+          this.parentChildRelationship(v.replies, article);
           return v.toResponseObject(/**isAdminSide */ true);
         }),
       };
@@ -176,7 +183,10 @@ export class CommentService {
     return {
       ...comments,
       items: comments.items.map(v => {
-        this.parentChildRelation(v.replies);
+        if (v.commenter.id === article.publisher.id) {
+          v.isOwnership = true;
+        }
+        this.parentChildRelationship(v.replies, article);
         return v.toResponseObject();
       }),
     };
@@ -206,10 +216,10 @@ export class CommentService {
    * @memberof CommentService
    */
   async create(
-    createOrRelyComment: CreateCommentDTO,
+    createCommentDTO: CreateCommentDTO,
     user: UserEntity,
   ): Promise<ICommentOutput> {
-    const { content, articleId } = createOrRelyComment;
+    const { content, articleId } = createCommentDTO;
 
     const article = <ArticleEntity>(
       await this.articleService.findOneForArticle({ uuid: articleId }, true)
@@ -247,17 +257,22 @@ export class CommentService {
       { uuid },
       true,
     )) as CommentEntity;
-    // 本用户对该评论的点赞数，作为点赞的反响操作
+    // 本用户对该评论的点赞数，作为点赞的反相操作
     const likeOfCurrentUser: number = comment.likes.filter(
       v => v.id === user.id,
     ).length;
 
     if (!likeOfCurrentUser) {
       comment.likes.push(user);
+      comment.likesCount = comment.likesCount + 1;
     } else {
-      comment.likes.splice(comment.likes.indexOf(user), 1);
+      const index = comment.likes.findIndex(v => v.id === user.id);
+      comment.likes.splice(index, 1);
+      comment.likesCount = comment.likesCount - 1;
     }
+
     try {
+      // 上面取到的comment已包含关联数据，这里save之后也保留着先前的数据，包含已修改和未修改的
       const savingComment = await this.commentRepository.save(comment);
       return savingComment.toResponseObject();
     } catch (error) {

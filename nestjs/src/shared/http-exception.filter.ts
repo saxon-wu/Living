@@ -27,7 +27,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: status,
       responseTime: `${Date.now() - now}ms`,
       message: exception.message || '请求异常',
-      result: {
+      results: {
         info: {
           timestamp: formatDate(Date.now()),
           path: request.url,

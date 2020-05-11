@@ -20,6 +20,7 @@ import {
 import { CreateTagDTO, UpdateTagDTO } from './tag.dto';
 import { UserEntity } from '@src/user/user.entity';
 import { ITagOutput } from './tag.interface';
+import { transformRelations } from '@src/shared/helper.util';
 
 @Injectable()
 export class TagService {
@@ -88,8 +89,6 @@ export class TagService {
       throw new NotFoundException('标签不存在');
     }
 
-    // this.parentChildRelation(tag.replies);
-
     if (returnsEntity) {
       return tag;
     }
@@ -110,8 +109,8 @@ export class TagService {
     isAdminSide: boolean = false,
   ): Promise<Pagination<ITagOutput>> {
     const queryBuilder = this.tagRepository.createQueryBuilder(this.table);
-    for (const item of this.relations) {
-      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
+    for (const item of transformRelations(this.table, this.relations)) {
+      queryBuilder.leftJoinAndSelect(item.property, item.alias);
     }
     const tags: Pagination<TagEntity> = await paginate<TagEntity>(
       queryBuilder,
@@ -175,8 +174,8 @@ export class TagService {
     isAdminSide: boolean = false,
   ): Promise<Pagination<ITagOutput>> {
     const queryBuilder = this.tagRepository.createQueryBuilder(this.table);
-    for (const item of this.relations) {
-      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
+    for (const item of transformRelations(this.table, this.relations)) {
+      queryBuilder.leftJoinAndSelect(item.property, item.alias);
     }
     let tags: Pagination<TagEntity> = await paginate<TagEntity>(
       queryBuilder,

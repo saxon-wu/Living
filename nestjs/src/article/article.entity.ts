@@ -6,14 +6,17 @@ import {
   JoinColumn,
   JoinTable,
   OneToMany,
+  RelationCount,
+  OneToOne,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { UserEntity } from '@src/user/user.entity';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
 import { ArticleStatusEnum } from './article.enum';
-import { IArticleOutput } from './article.interface';
+import { IArticleOutput, IContent } from './article.interface';
 import { TagEntity } from '@src/tag/tag.entity';
+import { FileEntity } from '@src/file/file.entity';
 
 @Entity('article')
 export class ArticleEntity extends SharedEntity {
@@ -25,9 +28,9 @@ export class ArticleEntity extends SharedEntity {
   @IsNotEmpty()
   @IsString()
   @Column({
-    type: 'text',
+    type: 'json',
   })
-  content: string;
+  content: IContent;
 
   @Column({
     type: 'enum',
@@ -35,6 +38,10 @@ export class ArticleEntity extends SharedEntity {
     default: ArticleStatusEnum.NORMAL,
   })
   status: ArticleStatusEnum;
+
+  @OneToOne(type => FileEntity)
+  @JoinColumn()
+  cover: FileEntity;
 
   @Column({
     type: 'boolean',
@@ -73,6 +80,9 @@ export class ArticleEntity extends SharedEntity {
   })
   likes: UserEntity[];
 
+  @RelationCount((articleEntity: ArticleEntity) => articleEntity.likes)
+  likesCount: number;
+
   /**
    * @description 文章属于用户(收藏)
    * @type {UserEntity[]}
@@ -84,6 +94,8 @@ export class ArticleEntity extends SharedEntity {
   )
   bookmarkUsers: UserEntity[];
 
+  @RelationCount((articleEntity: ArticleEntity) => articleEntity.bookmarkUsers)
+  bookmarkUsersCount: number;
   /**
    * @description 文章的评论
    * @type {CommentEntity[]}
@@ -95,6 +107,9 @@ export class ArticleEntity extends SharedEntity {
   )
   comments: CommentEntity[];
 
+  @RelationCount((articleEntity: ArticleEntity) => articleEntity.comments)
+  commentsCount: number;
+
   /**
    * @description 文章属于标签
    * @type {TagEntity[]}
@@ -105,6 +120,8 @@ export class ArticleEntity extends SharedEntity {
     tag => tag.articles,
   )
   tags: TagEntity[];
+
+  isOwnership: boolean = false;
 
   /**
    * @description 返回对象
@@ -126,23 +143,33 @@ export class ArticleEntity extends SharedEntity {
       likes,
       bookmarkUsers,
       status,
+      isOwnership,
+      isPublic,
+      cover,
+      likesCount,
+      bookmarkUsersCount,
+      commentsCount,
     } = this;
     const common = {
       title,
       content,
+      createdAt,
+      updatedAt,
+      isOwnership,
+      isPublic,
+      cover: cover?.toResponseObject() || null,
       publisher: publisher?.toResponseObject() || null,
       likes: likes?.map(v => v.toResponseObject()) || null,
-      likesCount: likes?.length || 0,
       bookmarkUsers: bookmarkUsers?.map(v => v.toResponseObject()) || null,
-      bookmarkUsersCount: bookmarkUsers?.length || 0,
+      likesCount,
+      bookmarkUsersCount,
+      commentsCount,
     };
     if (isAdminSide) {
       return {
         id,
         uuid,
         status,
-        createdAt,
-        updatedAt,
         ...common,
       };
     }

@@ -205,10 +205,15 @@ export class ReplyService {
 
     if (!likeOfCurrentUser) {
       reply.likes.push(user);
+      reply.likesCount = reply.likesCount + 1;
     } else {
-      reply.likes.splice(reply.likes.indexOf(user), 1);
+      const index = reply.likes.findIndex(v => v.id === user.id);
+      reply.likes.splice(index, 1);
+      reply.likesCount = reply.likesCount - 1;
     }
+
     try {
+      // 上面取到的comment已包含关联数据，这里save之后也保留着先前的数据，包含已修改和未修改的
       const savingReply = await this.replyRepository.save(reply);
       return savingReply.toResponseObject();
     } catch (error) {

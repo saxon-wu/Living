@@ -15,14 +15,22 @@ import {
   Pagination,
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
-import { UpdateUserDTO } from './user.dto';
+import { UpdateUserForAdminDTO, UpdateUserDTO } from './user.dto';
 import { UserStatusEnum } from './user.enum';
 import { IUserOutput } from './user.interface';
+import { plainToClass } from 'class-transformer';
+import { FileEntity } from '@src/file/file.entity';
+import { transformRelations } from '@src/shared/helper.util';
 
 @Injectable()
 export class UserService {
   private readonly logger: Logger = new Logger(UserService.name);
-  private readonly relations = ['articles', 'bookmarks', 'likeArticles'];
+  private readonly relations = [
+    'articles',
+    'bookmarks',
+    'likeArticles',
+    'avatar',
+  ];
   private readonly table = 'user';
 
   constructor(
@@ -59,23 +67,26 @@ export class UserService {
     userParamDTO: UUIDParamDTO | IdParamDTO,
     returnsEntity: boolean = false,
   ): Promise<UserEntity | IUserOutput> {
-    let user: UserEntity;
+    const queryBuilder = this.userRepository.createQueryBuilder(this.table);
     if ((userParamDTO as UUIDParamDTO).uuid) {
       const { uuid } = <UUIDParamDTO>userParamDTO;
-      user = await this.userRepository.findOne(
-        { uuid },
-        {
-          relations: this.relations,
-        },
-      );
+      queryBuilder.where('user.uuid = :uuid', { uuid });
     } else if ((userParamDTO as IdParamDTO).id) {
       const { id } = <IdParamDTO>userParamDTO;
-      user = await this.userRepository.findOne(id, {
-        relations: this.relations,
-      });
+      queryBuilder.where('user.id = :id', { id });
     } else {
       throw new BadRequestException('亲，传入的参数不正确');
     }
+    const user = await queryBuilder
+      .leftJoinAndSelect('user.avatar', 'avatar')
+      /** 已替换成@RelationCount */
+      // .loadRelationCountAndMap('articles.articlesCount', 'user.articles')
+      // .loadRelationCountAndMap('bookmarks.bookmarksCount', 'user.bookmarks')
+      // .loadRelationCountAndMap(
+      //   'likeArticles.likeArticlesCount',
+      //   'user.likeArticles',
+      // )
+      .getOne();
 
     if (!user) {
       throw new NotFoundException('用户不存在');
@@ -100,8 +111,8 @@ export class UserService {
     isAdminSide: boolean = false,
   ): Promise<Pagination<IUserOutput>> {
     const queryBuilder = this.userRepository.createQueryBuilder(this.table);
-    for (const item of this.relations) {
-      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
+    for (const item of transformRelations(this.table, this.relations)) {
+      queryBuilder.leftJoinAndSelect(item.property, item.alias);
     }
     const users: Pagination<UserEntity> = await paginate<UserEntity>(
       queryBuilder,
@@ -172,6 +183,58 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
+  /**
+   * @description 更新[前台专用]
+   * @author Saxon
+   * @date 2020-05-02
+   * @param {UpdateUserDTO} userDTO
+   * @param {UserEntity} user
+   * @returns
+   * @memberof UserService
+   */
+  async update(userDTO: UpdateUserDTO, user: UserEntity) {
+    const { avatarId } = userDTO;
+
+    const file = plainToClass(FileEntity, { uuid: avatarId });
+
+    try {
+      const updatingUser = await this.userRepository.update(user.id, {
+        avatar: file,
+      });
+      if (!updatingUser.affected) {
+        return '更新失败';
+      }
+      return '更新成功';
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
+    }
+  }
+
+  /**
+   * @description 更新头像
+   * @author Saxon
+   * @date 2020-05-02
+   * @param {FileEntity} file
+   * @param {UserEntity} user
+   * @returns
+   * @memberof UserService
+   */
+  async updateAvatar(file: FileEntity, user: UserEntity) {
+    try {
+      const updatingUser = await this.userRepository.update(user.id, {
+        avatar: file,
+      });
+      if (!updatingUser.affected) {
+        return '更新失败';
+      }
+      return '更新成功';
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error.message, '服务器异常');
+    }
+  }
+
   /** ------------------------------------ADMIN------------------------------------------ */
 
   /**
@@ -179,13 +242,13 @@ export class UserService {
    * @author Saxon
    * @date 2020-04-03
    * @param {IdParamDTO} idParamDTO
-   * @param {UpdateUserDTO} userDTO
+   * @param {UpdateUserForAdminDTO} userDTO
    * @returns {Promise<string>}
    * @memberof UserService
    */
   async updateForAdmin(
     idParamDTO: IdParamDTO,
-    userDTO: UpdateUserDTO,
+    userDTO: UpdateUserForAdminDTO,
   ): Promise<string> {
     const { id } = idParamDTO;
     const { status } = userDTO;
@@ -203,8 +266,8 @@ export class UserService {
     }
 
     try {
-      const updatingAticle = await this.userRepository.update(id, userDTO);
-      if (!updatingAticle.affected) {
+      const updatingUser = await this.userRepository.update(id, userDTO);
+      if (!updatingUser.affected) {
         return '更新失败';
       }
       return '更新成功';

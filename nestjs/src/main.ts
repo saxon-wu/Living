@@ -1,26 +1,39 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, HttpStatus } from '@nestjs/common';
 import { HttpExceptionFilter } from './shared/http-exception.filter';
 import { TransformInterceptor } from './shared/transform.interceptor';
 import * as rateLimit from 'express-rate-limit';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 const PORT = process.env.APP_PORT || 3000;
 const PREFIX = process.env.API_PREFIX || 'api';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // // 允许跨域资源共享
+  // 允许跨域资源共享 端口80不可为 http:xxx:80
   app.enableCors({
-    origin: ['http://localhost:8000', 'http://localhost:8001', 'http://localhost:80']
+    origin: [
+      'http://localhost:8000',
+      'http://localhost:8001',
+      'http://localhost',
+      'http://localhost:3000',
+    ],
   });
 
-  // somewhere in your initialization file
+  // 限制请求次数
   app.use(
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
+      max: 1000, // limit each IP to 100 requests per windowMs
+      message: {
+        status: HttpStatus.TOO_MANY_REQUESTS,
+        message: '请求过于频繁，请稍候再试！',
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
+        results: null,
+      },
     }),
   );
 
@@ -49,6 +62,10 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useStaticAssets(join(__dirname, '..', 'public'), {
+    prefix: '/public/',
+  });
 
   await app
     .listen(PORT)

@@ -16,7 +16,11 @@ import {
   UpdateArticleDTOForAdmin,
 } from './article.dto';
 import { validate } from 'class-validator';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import {
+  UUIDParamDTO,
+  IdParamDTO,
+  TitleParamDTO,
+} from '@src/shared/shared.dto';
 import { UserService } from '@src/user/user.service';
 import { UserEntity } from '@src/user/user.entity';
 import {
@@ -27,17 +31,28 @@ import {
 import { ArticleStatusEnum } from './article.enum';
 import { IArticleOutput } from './article.interface';
 import { IUserOutput } from '@src/user/user.interface';
+import { transformRelations } from '@src/shared/helper.util';
+import { FileService } from '@src/file/file.service';
+import { NOT_FOUND_IMAGE } from '@src/shared/constant';
 
 @Injectable()
 export class ArticleService {
   private readonly logger: Logger = new Logger(ArticleService.name);
-  private readonly relations = ['publisher', 'likes', 'bookmarkUsers'];
+  private readonly relations = [
+    'publisher',
+    'likes',
+    'bookmarkUsers',
+    'comments',
+    'publisher.avatar',
+    'cover'
+  ];
   private readonly table = 'article';
 
   constructor(
     @InjectRepository(ArticleEntity)
     private readonly articleRepository: Repository<ArticleEntity>,
     private readonly userService: UserService,
+    private readonly fileService: FileService,
   ) {}
 
   /**
@@ -53,6 +68,24 @@ export class ArticleService {
     const errors = await validate(object);
     if (errors.length > 0) {
       throw new BadRequestException(errors, '验证失败');
+    }
+  }
+
+  /**
+   * @description Editor.js 编辑器输出的数据验证
+   * @author Saxon
+   * @date 2020-04-27
+   * @private
+   * @param {*} content
+   * @memberof ArticleService
+   */
+  private editorjsFormatValidator(content: any) {
+    if (
+      !content.blocks ||
+      !Array.isArray(content.blocks) ||
+      !content.blocks.length
+    ) {
+      throw new BadRequestException('亲，内容格式不对哦');
     }
   }
 
@@ -80,11 +113,20 @@ export class ArticleService {
    * @memberof ArticleService
    */
   async findOneForArticle(
-    paramDTO: UUIDParamDTO | IdParamDTO,
+    paramDTO: UUIDParamDTO | IdParamDTO | TitleParamDTO,
     returnsEntity: boolean = false,
+    user?: UserEntity | null,
   ): Promise<ArticleEntity | IArticleOutput> {
     let article: ArticleEntity;
-    if ((paramDTO as UUIDParamDTO).uuid) {
+    if ((paramDTO as TitleParamDTO).title) {
+      const { title } = <TitleParamDTO>paramDTO;
+      article = await this.articleRepository.findOne(
+        { title },
+        {
+          relations: this.relations,
+        },
+      );
+    } else if ((paramDTO as UUIDParamDTO).uuid) {
       const { uuid } = <UUIDParamDTO>paramDTO;
       article = await this.articleRepository.findOne(
         { uuid },
@@ -104,6 +146,36 @@ export class ArticleService {
     if (!article) {
       throw new NotFoundException('文章不存在');
     }
+
+    if (article.publisher.id === user?.id) {
+      article.isOwnership = true;
+    }
+
+    // 根据file的id获取filename，拼接成url
+    for (const v of article.content.blocks) {
+      if (v.type === 'image') {
+        const id = (v.data as any).file?.id;
+        let filename = null;
+        if (!id) {
+          // 文章中的图片不存在，生成占位图，避免报错和图片空缺
+          await this.fileService.makePlaceholder(
+            NOT_FOUND_IMAGE.text,
+            NOT_FOUND_IMAGE.filename,
+          );
+          filename = NOT_FOUND_IMAGE.filename;
+        } else {
+          const file = await this.fileService.findOneForFile(
+            { uuid: id },
+            /* returnsEntity */ true,
+          );
+          filename = file.filename;
+        }
+        (v.data as any).file.url = `${process.env.APP_URL_PREFIX}${
+          process.env.APP_PORT === '80' ? '' : `:${process.env.APP_PORT}`
+        }/api/v1/file/image/${filename}`;
+      }
+    }
+
     if (returnsEntity) {
       return article;
     }
@@ -124,13 +196,15 @@ export class ArticleService {
     isAdminSide: boolean = false,
   ): Promise<Pagination<IArticleOutput>> {
     const queryBuilder = this.articleRepository.createQueryBuilder(this.table);
-    for (const item of this.relations) {
-      queryBuilder.leftJoinAndSelect(`${this.table}.${item}`, item);
+    queryBuilder.orderBy(`${this.table}.createdAt`, 'DESC');
+    for (const item of transformRelations(this.table, this.relations)) {
+      queryBuilder.leftJoinAndSelect(item.property, item.alias);
     }
     const articles: Pagination<ArticleEntity> = await paginate<ArticleEntity>(
       queryBuilder,
       options,
     );
+
     if (isAdminSide) {
       return {
         ...articles,
@@ -146,7 +220,7 @@ export class ArticleService {
   }
 
   /**
-   * @description 查询一条
+   * @description 查询一条 输出给客户端
    * @author Saxon
    * @date 2020-03-11
    * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
@@ -154,9 +228,14 @@ export class ArticleService {
    * @memberof ArticleService
    */
   async findOne(
-    paramDTO: UUIDParamDTO | IdParamDTO,
+    paramDTO: UUIDParamDTO | IdParamDTO | TitleParamDTO,
+    user?: UserEntity | null,
   ): Promise<ArticleEntity | IArticleOutput> {
-    return await this.findOneForArticle(paramDTO);
+    return await this.findOneForArticle(
+      paramDTO,
+      /* returnsEntity */ false,
+      user,
+    );
   }
 
   /**
@@ -173,14 +252,17 @@ export class ArticleService {
     user: UserEntity,
   ): Promise<IArticleOutput> {
     const { title, content } = articleDTO;
+    this.editorjsFormatValidator(content);
     const article = await this.articleRepository.findOne({ title });
 
     // 60 seconds 内不可重复提交
-    const timestamp = new Date(article.createdAt).valueOf();
-    if (timestamp + 60 * 1000 > Date.now()) {
-      throw new ConflictException(
-        '亲，系统阻止了，请确认是否重复提交，1分钟后可再次提交',
-      );
+    if (article) {
+      const timestamp = new Date(article.createdAt).valueOf();
+      if (timestamp + 60 * 1000 > Date.now()) {
+        throw new ConflictException(
+          '亲，系统阻止了，请确认是否重复提交，1分钟后可再次提交',
+        );
+      }
     }
     const creatingArticle = this.articleRepository.create(articleDTO);
 
@@ -207,7 +289,7 @@ export class ArticleService {
    */
   async update(
     paramDTO: UUIDParamDTO,
-    articleDTO: CreateArticleDTO,
+    articleDTO: UpdateArticleDTO,
     user: UserEntity,
   ): Promise<IArticleOutput | string> {
     const { uuid } = paramDTO;
@@ -215,16 +297,11 @@ export class ArticleService {
     if (!title && !content) {
       throw new BadRequestException('亲，参数不可为空');
     }
-    const article = <ArticleEntity>await this.findOneForArticle(paramDTO);
+    this.editorjsFormatValidator(content);
+    const article = <ArticleEntity>(
+      await this.findOneForArticle(paramDTO, /* returnsEntity */ true)
+    );
     this.ensureOwnership(user, article);
-
-    if (
-      (article.title === title && article.content === content) ||
-      (!title && article.content === content) ||
-      (!content && article.title === title)
-    ) {
-      throw new BadRequestException('亲，请修改后再提交');
-    }
 
     try {
       const updatingAticle = await this.articleRepository.update(

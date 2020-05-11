@@ -1,25 +1,42 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsObject,
+  IsBoolean,
+} from 'class-validator';
 import { ArticleStatusEnum } from './article.enum';
+import { IContent } from './article.interface';
+
 export class CreateArticleDTO {
-  @IsOptional()
   @IsNotEmpty()
   @IsString()
   title: string;
 
-  @IsOptional()
   @IsNotEmpty()
-  @IsString()
-  content: string;
+  @IsObject()
+  content: IContent;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  isPublic: boolean;
 }
 
 export class UpdateArticleDTO {
+  otherProperty: string;
+
   @IsNotEmpty()
   @IsString()
   title: string;
 
   @IsNotEmpty()
-  @IsString()
-  content: string;
+  @IsObject()
+  content: IContent;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  isPublic: boolean;
 }
 
 export class UpdateArticleDTOForAdmin {

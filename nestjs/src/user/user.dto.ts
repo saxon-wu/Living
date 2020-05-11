@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsUUID, UUIDVersion } from 'class-validator';
 import { UserStatusEnum } from './user.enum';
 
 
@@ -13,6 +13,14 @@ export class CreateUserDTO {
 }
 
 export class UpdateUserDTO {
+  @IsUUID(process.env.UUID_VERSION as UUIDVersion, {
+    message: '亲，无效的avatarId',
+  })
+  @IsNotEmpty()
+  avatarId: string;
+}
+
+export class UpdateUserForAdminDTO {
   @IsNotEmpty()
   @IsString()
   @IsEnum(UserStatusEnum)

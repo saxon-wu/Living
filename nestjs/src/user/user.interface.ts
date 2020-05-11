@@ -1,5 +1,6 @@
 import { IArticleOutput } from '@src/article/article.interface';
 import { UserStatusEnum } from './user.enum';
+import { IFileOutput } from '@src/file/file.interface';
 
 export interface IAccessTokenOutput {
   readonly accessToken: string;
@@ -20,4 +21,5 @@ export interface IUserOutput {
   readonly status?: UserStatusEnum;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
+  readonly avatar: IFileOutput | { url: string };
 }

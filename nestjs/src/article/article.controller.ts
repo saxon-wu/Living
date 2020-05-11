@@ -11,8 +11,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
-import { CreateArticleDTO } from './article.dto';
-import { UUIDParamDTO } from '@src/shared/shared.dto';
+import { CreateArticleDTO, UpdateArticleDTO } from './article.dto';
+import { UUIDParamDTO, TitleParamDTO } from '@src/shared/shared.dto';
 import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
 import { UserEntity } from '@src/user/user.entity';
@@ -39,8 +39,14 @@ export class ArticleController {
   }
 
   @Get(`${ONE}/:uuid`)
-  async findOne(@Param() paramDTO: UUIDParamDTO): Promise<IArticleOutput> {
-    return <IArticleOutput>await this.articleService.findOne(paramDTO);
+  async findOne(
+    @Param() paramDTO: UUIDParamDTO,
+    @User() user: UserEntity | undefined,
+  ): Promise<IArticleOutput> {
+    // user 的作用是 无需守卫时提供用户信息，以方便判定所有者
+    return <IArticleOutput>(
+      await this.articleService.findOne(paramDTO, user || null)
+    );
   }
 
   @UseGuards(AuthGuard)
@@ -56,7 +62,7 @@ export class ArticleController {
   @Put(`${ONE}/:uuid`)
   async update(
     @Param() articleParamDTO: UUIDParamDTO,
-    @Body() articleDTO: CreateArticleDTO,
+    @Body() articleDTO: UpdateArticleDTO,
     @User() user: UserEntity,
   ): Promise<IArticleOutput | string> {
     return await this.articleService.update(articleParamDTO, articleDTO, user);

@@ -7,12 +7,11 @@ import {
 import * as jwt from 'jsonwebtoken';
 import { UserService } from '@src/user/user.service';
 import { IdParamDTO, UUIDParamDTO } from './shared.dto';
-import { Validator } from 'class-validator';
+import { isUUID } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  private readonly validator = new Validator();
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
@@ -26,7 +25,7 @@ export class AuthGuard implements CanActivate {
     const idOrUUID = decode.id;
     let param: any = {};
     if (
-      this.validator.isUUID(idOrUUID, this.configService.get('UUID_VERSION'))
+      isUUID(idOrUUID, this.configService.get('UUID_VERSION'))
     ) {
       (param as UUIDParamDTO).uuid = idOrUUID;
     } else {

@@ -5,6 +5,7 @@ import {
   ManyToMany,
   JoinTable,
   JoinColumn,
+  RelationCount,
 } from 'typeorm';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { UserEntity } from '@src/user/user.entity';
@@ -47,6 +48,9 @@ export class ReplyEntity extends SharedEntity {
   })
   likes: UserEntity[];
 
+  @RelationCount((replyEntity: ReplyEntity) => replyEntity.likes)
+  likesCount: number;
+
   /**
    * @description 回复所属的评论
    * @type {CommentEntity}
@@ -56,9 +60,7 @@ export class ReplyEntity extends SharedEntity {
     type => CommentEntity,
     comment => comment.replies,
   )
-  @JoinColumn({
-    name: 'comment_id',
-  })
+  @JoinColumn({ name: 'comment_id' })
   comment: CommentEntity;
 
   /**
@@ -72,6 +74,8 @@ export class ReplyEntity extends SharedEntity {
   })
   parentId: number;
 
+  isOwnership: boolean = false;
+
   /**
    * @description 返回对象
    * @author Saxon
@@ -81,18 +85,29 @@ export class ReplyEntity extends SharedEntity {
    * @memberof ReplyEntity
    */
   toResponseObject(isAdminSide: boolean = false): IReplyOutput {
-    const { id, uuid, createdAt, updatedAt, replier, likes, content } = this;
+    const {
+      id,
+      uuid,
+      createdAt,
+      updatedAt,
+      replier,
+      likes,
+      content,
+      isOwnership,
+      likesCount,
+    } = this;
     const common = {
       content,
+      createdAt,
+      isOwnership,
       replier: replier?.toResponseObject() || null,
       likes: likes?.map(v => v.toResponseObject()) || null,
-      likesCount: likes?.length || 0,
+      likesCount,
     };
     if (isAdminSide) {
       return {
         id,
         uuid,
-        createdAt,
         updatedAt,
         ...common,
       };

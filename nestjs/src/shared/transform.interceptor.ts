@@ -39,24 +39,24 @@ export class TransformInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data: any) => {
         // 当data是string类型，说明是提示信息，应当交给message
-        let result: any;
+        let results: any;
         if (typeof data === 'string') {
           message = data;
-          result = null;
+          results = null;
         } else {
-          result = classToPlain(data);
+          results = classToPlain(data);
         }
         const obj = {
           statusCode: 0,
           responseTime: `${Date.now() - now}ms`,
           message,
-          result,
+          results,
         };
         if (data?.message) {
           obj.message = data.message;
           delete data.message;
           // lodash 的isEmpty 检查 value 是否为一个空对象，集合，映射或者set。数字和boolean都是true
-          obj.result = _.isEmpty(data) ? null : classToPlain(data);
+          obj.results = _.isEmpty(data) ? null : classToPlain(data);
         }
         return obj;
       }),

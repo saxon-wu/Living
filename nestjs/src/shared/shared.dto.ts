@@ -1,9 +1,9 @@
-import { IsUUID, IsInt, IsNotEmpty } from 'class-validator';
+import { IsUUID, IsInt, IsNotEmpty, IsString, UUIDVersion } from 'class-validator';
 import { Type } from 'class-transformer/decorators';
 
 export class UUIDParamDTO {
-  @IsUUID('4', {
-    message: '亲，ID无效',
+  @IsUUID(process.env.UUID_VERSION as UUIDVersion, {
+    message: '亲，无效的ID',
   })
   uuid: string;
 }
@@ -13,4 +13,10 @@ export class IdParamDTO {
   @IsInt()
   @IsNotEmpty()
   id: number;
+}
+
+export class TitleParamDTO {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
 }

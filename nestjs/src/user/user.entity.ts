@@ -5,6 +5,9 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  OneToOne,
+  JoinColumn,
+  RelationCount,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
@@ -15,6 +18,7 @@ import { CommentEntity } from '@src/comment/comment.entity';
 import { SharedEntity } from '@src/shared/shared.entity';
 import { IAccessTokenOutput, IUserOutput } from '@src/user/user.interface';
 import { UserStatusEnum } from './user.enum';
+import { FileEntity } from '@src/file/file.entity';
 
 @Entity('user')
 export class UserEntity extends SharedEntity {
@@ -38,6 +42,10 @@ export class UserEntity extends SharedEntity {
   })
   password: string;
 
+  @OneToOne(type => FileEntity)
+  @JoinColumn()
+  avatar: FileEntity;
+
   @Column({
     type: 'enum',
     enum: UserStatusEnum,
@@ -57,6 +65,9 @@ export class UserEntity extends SharedEntity {
   )
   articles: ArticleEntity[];
 
+  @RelationCount((userEntity: UserEntity) => userEntity.articles)
+  articlesCount: number;
+
   /**
    * @description 用户拥有收藏的(文章)
    * @type {ArticleEntity[]}
@@ -72,6 +83,9 @@ export class UserEntity extends SharedEntity {
   })
   bookmarks: ArticleEntity[];
 
+  @RelationCount((userEntity: UserEntity) => userEntity.bookmarks)
+  bookmarksCount: number;
+
   /**
    * @description 用户属于点赞的(文章)
    * @type {ArticleEntity[]}
@@ -82,6 +96,9 @@ export class UserEntity extends SharedEntity {
     article => article.likes,
   )
   likeArticles: ArticleEntity[];
+
+  @RelationCount((userEntity: UserEntity) => userEntity.likeArticles)
+  likeArticlesCount: number;
 
   /**
    * @description 用户发表的评论
@@ -104,6 +121,12 @@ export class UserEntity extends SharedEntity {
     comment => comment.likes,
   )
   likeComments: ArticleEntity[];
+
+  @OneToMany(
+    type => FileEntity,
+    file => file.uploader,
+  )
+  files: FileEntity[];
 
   /**
    * @description 插入之前把密码哈希
@@ -177,16 +200,27 @@ export class UserEntity extends SharedEntity {
       likeArticles,
       tokenObject,
       status,
+      avatar,
+      bookmarksCount,
+      articlesCount,
+      likeArticlesCount,
     } = this;
 
     const common = {
       username,
+      avatar: avatar?.toResponseObject() || {
+        url: `${process.env.APP_URL_PREFIX}${
+          process.env.APP_PORT === '80'
+            ? ''
+            : `:${process.env.APP_PORT}/public/default.png`
+        }`,
+      },
       bookmarks: bookmarks?.map(v => v.toResponseObject()) || null,
-      bookmarksCount: bookmarks?.length || 0,
       articles: articles?.map(v => v.toResponseObject()) || null,
-      articlesCount: articles?.length || 0,
       likeArticles: likeArticles?.map(v => v.toResponseObject()) || null,
-      likeArticlesCount: likeArticles?.length || 0,
+      bookmarksCount,
+      articlesCount,
+      likeArticlesCount,
     };
     if (isAdminSide) {
       return {

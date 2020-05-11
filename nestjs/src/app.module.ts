@@ -9,26 +9,32 @@ import { AuthModule } from './auth/auth.module';
 import { CommentModule } from './comment/comment.module';
 import { ReplyModule } from './reply/reply.module';
 import { TagModule } from './tag/tag.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: config.get<any>('TYPEORM_CONNECTION'),
-        host: config.get('TYPEORM_HOST'),
-        port: Number.parseInt(config.get('TYPEORM_PORT'), 10),
-        username: config.get('TYPEORM_USERNAME'),
-        password: config.get('TYPEORM_PASSWORD'),
-        database: config.get<string>('TYPEORM_DATABASE'),
-        entities: config.get('TYPEORM_ENTITIES').split(',').map((v: string) => __dirname + v),
-        synchronize: config.get('NODE_ENV') && config.get('TYPEORM_SYNCHRONIZE') === 'true',
-        logging: config.get('TYPEORM_LOGGING') === 'true'
-      })
+      useFactory: (configService: ConfigService) => ({
+        type: configService.get<any>('TYPEORM_CONNECTION'),
+        host: configService.get('TYPEORM_HOST'),
+        port: Number.parseInt(configService.get('TYPEORM_PORT'), 10),
+        username: configService.get('TYPEORM_USERNAME'),
+        password: configService.get('TYPEORM_PASSWORD'),
+        database: configService.get<string>('TYPEORM_DATABASE'),
+        entities: configService
+          .get('TYPEORM_ENTITIES')
+          .split(',')
+          .map((v: string) => __dirname + v),
+        synchronize:
+          configService.get('NODE_ENV') &&
+          configService.get('TYPEORM_SYNCHRONIZE') === 'true',
+        logging: configService.get('TYPEORM_LOGGING') === 'true',
+      }),
     }),
     ConfigModule.forRoot({
       envFilePath: `.development.env`,
-      isGlobal: true
+      isGlobal: true,
     }),
     ArticleModule,
     UserModule,
@@ -36,6 +42,7 @@ import { TagModule } from './tag/tag.module';
     CommentModule,
     ReplyModule,
     TagModule,
+    FileModule,
   ],
   controllers: [],
   providers: [],
