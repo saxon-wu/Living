@@ -27,7 +27,7 @@ import { FileModule } from './file/file.module';
           .split(',')
           .map((v: string) => __dirname + v),
         synchronize:
-          configService.get('NODE_ENV') &&
+          configService.get('NODE_ENV') === 'development' &&
           configService.get('TYPEORM_SYNCHRONIZE') === 'true',
         logging: configService.get('TYPEORM_LOGGING') === 'true',
       }),
