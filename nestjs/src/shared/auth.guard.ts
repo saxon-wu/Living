@@ -24,16 +24,14 @@ export class AuthGuard implements CanActivate {
 
     const idOrUUID = decode.id;
     let param: any = {};
-    if (
-      isUUID(idOrUUID, this.configService.get('UUID_VERSION'))
-    ) {
-      (param as UUIDParamDTO).uuid = idOrUUID;
+    if (isUUID(idOrUUID, this.configService.get('UUID_VERSION'))) {
+      (param as UUIDParamDTO).id = idOrUUID;
     } else {
       (param as IdParamDTO).id = idOrUUID;
     }
 
     // request.user是内部使用的，所以findOneByuuidForUser返回UserEntity类型更方便，比如关联存储
-    request.user = await this.userService.findOneForUser(param, true);
+    request.user = await this.userService.findOneForUser(param);
     return true;
   }
 

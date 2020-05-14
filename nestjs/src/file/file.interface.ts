@@ -14,3 +14,10 @@ export interface IFileOutput {
   readonly updatedAt?: Date;
   readonly url: string;
 }
+
+export interface IFileProperty {
+  readonly filename: string;
+  readonly originalname: string;
+  readonly size: number;
+  readonly mimetype: string;
+}

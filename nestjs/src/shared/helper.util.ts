@@ -209,3 +209,15 @@ export function transformRelations(tableName: string, relations: string[]) {
     };
   });
 }
+
+/**
+ * @description filename转成完整的url
+ * @author Saxon
+ * @date 2020-05-12
+ * @export
+ * @param {string} filename
+ * @returns
+ */
+export function filenameToUrl(filename: string) {
+  return `${process.env.APP_IMAGE_URL_PREFIX}/api/v1/file/image/${filename}`;
+}

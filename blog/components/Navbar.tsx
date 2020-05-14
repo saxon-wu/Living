@@ -138,18 +138,20 @@ const Navbar: React.FunctionComponent<Props> = ({ transparent }) => {
           </a>
           {user.username ? (
             <div className="p-1 flex flex-row relative Y-has-dropdown">
-              <img
-                className="inline-block h-8 w-8 rounded-full"
-                src={user.avatarUrl + AVATAR_SM}
-                alt=""
-              />
-              <a
-                href="#"
-                className="p-2 no-underline hidden md:block lg:block"
-              >
-                {user.username}
-              </a>
-              <ul className="rounded hidden shadow-md bg-white text-gray-800 absolute top-0 mt-10 right-0 z-30">
+              <Link as={`/u/${user.id}`} href="/u/[id]">
+                <a
+                  href="#"
+                  className="p-2 no-underline hidden md:block lg:block cursor-pointer"
+                >
+                  <img
+                    className="inline-block h-8 w-8 rounded-full"
+                    src={user.avatarUrl + AVATAR_SM}
+                    alt=""
+                  />
+                  {user.username}
+                </a>
+              </Link>
+              <ul className="rounded hidden shadow-md bg-white text-gray-800 absolute top-0 mt-12 right-0 z-30">
                 <li>
                   <div
                     onClick={refetchUserinfo}

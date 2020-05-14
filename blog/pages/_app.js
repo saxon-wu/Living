@@ -4,7 +4,7 @@ import NProgress from "nprogress";
 import UserContext from "../components/UserContext";
 import "../styles/index.css";
 import "../styles/nprogress.css";
-import "react-toastify/dist/ReactToastify.css";
+import "react-toastify/dist/ReactToastify.min.css";
 import { useState, useEffect } from "react";
 import store from "store2";
 import { isEmpty, isObject } from "lodash";

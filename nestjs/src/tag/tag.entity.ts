@@ -23,9 +23,9 @@ export class TagEntity extends SharedEntity {
 
   @Column({
     name: 'parent_id',
-    default: 0,
+    nullable: true,
   })
-  parentId: number;
+  parentId: string;
 
   /**
    * @description 创建者
@@ -63,38 +63,4 @@ export class TagEntity extends SharedEntity {
    * @memberof TagEntity
    */
   children: TagEntity[];
-
-  toResponseObject(isAdminSide: boolean = false): ITagOutput {
-    const {
-      id,
-      uuid,
-      createdAt,
-      updatedAt,
-      name,
-      describe,
-      creator,
-      articles,
-      children,
-      parentId
-    } = this;
-    const common = {
-      name,
-      describe,
-      creator: creator?.toResponseObject() || null,
-      articles: articles?.map(v => v.toResponseObject()),
-      articlesCount: articles?.length,
-      children,
-      parentId
-    };
-    if (isAdminSide) {
-      return {
-        id,
-        uuid,
-        createdAt,
-        updatedAt,
-        ...common,
-      };
-    }
-    return { id: uuid, ...common };
-  }
 }

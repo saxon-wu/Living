@@ -11,7 +11,7 @@ import { TagEntity } from './tag.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm';
 import { ArticleService } from '@src/article/article.service';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import {
   paginate,
   Pagination,
@@ -43,7 +43,7 @@ export class TagService {
    * @returns {TagEntity[]}
    * @memberof TagService
    */
-  private infiniteRecursion(data: TagEntity[], starting: number): TagEntity[] {
+  private infiniteRecursion(data: TagEntity[], starting: string): TagEntity[] {
     return (function x(id) {
       return data
         .filter(v => v.parentId === id)
@@ -58,41 +58,22 @@ export class TagService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-04-11
-   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
-   * @param {boolean} [returnsEntity=false]
-   * @returns {(Promise<TagEntity | ITagOutput>)}
+   * @param {UUIDParamDTO} paramDTO
+   * @returns {Promise<TagEntity>}
    * @memberof TagService
    */
-  async findOneForTag(
-    paramDTO: UUIDParamDTO | IdParamDTO,
-    returnsEntity: boolean = false,
-  ): Promise<TagEntity | ITagOutput> {
+  async findOneForTag(paramDTO: UUIDParamDTO): Promise<TagEntity> {
     let tag: TagEntity;
-    if ((paramDTO as UUIDParamDTO).uuid) {
-      const { uuid } = <UUIDParamDTO>paramDTO;
-      tag = await this.tagRepository.findOne(
-        { uuid },
-        {
-          relations: this.relations,
-        },
-      );
-    } else if ((paramDTO as IdParamDTO).id) {
-      const { id } = <IdParamDTO>paramDTO;
-      tag = await this.tagRepository.findOne(id, {
-        relations: this.relations,
-      });
-    } else {
-      throw new BadRequestException('亲，传入的参数不正确');
-    }
+    const { id } = <UUIDParamDTO>paramDTO;
+    tag = await this.tagRepository.findOne(id, {
+      relations: this.relations,
+    });
 
     if (!tag) {
       throw new NotFoundException('标签不存在');
     }
 
-    if (returnsEntity) {
-      return tag;
-    }
-    return tag.toResponseObject();
+    return tag;
   }
 
   /**
@@ -107,7 +88,7 @@ export class TagService {
   async findAll(
     options: IPaginationOptions,
     isAdminSide: boolean = false,
-  ): Promise<Pagination<ITagOutput>> {
+  ): Promise<Pagination<TagEntity>> {
     const queryBuilder = this.tagRepository.createQueryBuilder(this.table);
     for (const item of transformRelations(this.table, this.relations)) {
       queryBuilder.leftJoinAndSelect(item.property, item.alias);
@@ -116,16 +97,8 @@ export class TagService {
       queryBuilder,
       options,
     );
-    if (isAdminSide) {
-      return {
-        ...tags,
-        items: tags.items.map(v => v.toResponseObject(/**isAdminSide */ true)),
-      };
-    }
-    return {
-      ...tags,
-      items: tags.items.map(v => v.toResponseObject()),
-    };
+
+    return tags;
   }
 
   /**
@@ -137,21 +110,24 @@ export class TagService {
    * @returns {Promise<ITagOutput>}
    * @memberof TagService
    */
-  async create(tagDTO: CreateTagDTO, user: UserEntity): Promise<ITagOutput> {
+  async create(tagDTO: CreateTagDTO, user: UserEntity): Promise<TagEntity> {
     const { name, describe, parentId } = tagDTO;
     const tag = await this.tagRepository.findOne({ name });
 
     if (tag) {
       throw new ConflictException('标签已存在');
     }
-    tagDTO.name = name.toLowerCase();
-    const creatingTag = this.tagRepository.create(tagDTO);
+
+    const creatingTag = this.tagRepository.create({
+      name: name.toLowerCase(),
+      describe,
+    });
 
     creatingTag.creator = user;
 
     try {
       const savingTag = await this.tagRepository.save(creatingTag);
-      return savingTag.toResponseObject();
+      return savingTag;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -172,7 +148,7 @@ export class TagService {
   async findAllForAdmin(
     options: IPaginationOptions,
     isAdminSide: boolean = false,
-  ): Promise<Pagination<ITagOutput>> {
+  ): Promise<Pagination<TagEntity>> {
     const queryBuilder = this.tagRepository.createQueryBuilder(this.table);
     for (const item of transformRelations(this.table, this.relations)) {
       queryBuilder.leftJoinAndSelect(item.property, item.alias);
@@ -182,42 +158,31 @@ export class TagService {
       options,
     );
     /* tag.items 是readonly，断言即可 */
-    (tags.items as TagEntity[]) = this.infiniteRecursion(tags.items, 0);
+    (tags.items as TagEntity[]) = this.infiniteRecursion(tags.items, '');
 
-    if (isAdminSide) {
-      return {
-        ...tags,
-        items: tags.items.map(v => v.toResponseObject(/**isAdminSide */ true)),
-      };
-    }
-    return {
-      ...tags,
-      items: tags.items.map(v => v.toResponseObject()),
-    };
+    return tags;
   }
 
   /**
    * @description 更新
    * @author Saxon
    * @date 2020-04-11
-   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
+   * @param {UUIDParamDTO} paramDTO
    * @param {UpdateTagDTO} tagDTO
    * @param {UserEntity} user
-   * @returns {(Promise<ITagOutput | string>)}
+   * @returns {(Promise<TagEntity | string>)}
    * @memberof TagService
    */
   async updateForAdmin(
-    paramDTO: UUIDParamDTO | IdParamDTO,
+    paramDTO: UUIDParamDTO,
     tagDTO: UpdateTagDTO,
     user: UserEntity,
-  ): Promise<ITagOutput | string> {
+  ): Promise<TagEntity | string> {
     const { name, describe } = tagDTO;
     if (!name && !describe) {
       throw new BadRequestException('亲，参数不可为空');
     }
-    const tag = <TagEntity>(
-      await this.findOneForTag(paramDTO, /* returnsEntity */ true)
-    );
+    const tag = <TagEntity>await this.findOneForTag(paramDTO);
 
     if (
       (tag.name === name && tag.describe === describe) ||
@@ -228,12 +193,15 @@ export class TagService {
     }
 
     try {
-      const updatingTag = await this.tagRepository.update(tag.id, tagDTO);
+      const updatingTag = await this.tagRepository.update(tag.id, {
+        name,
+        describe,
+      });
 
       if (!updatingTag.affected) {
         return '更新失败';
       }
-      return <ITagOutput>await this.findOneForTag(paramDTO);
+      return <TagEntity>await this.findOneForTag(paramDTO);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -248,14 +216,14 @@ export class TagService {
    * @returns {Promise<string>}
    * @memberof TagService
    */
-  async destroy(ids: number[]): Promise<string> {
+  async destroy(ids: string[]): Promise<string> {
     for (const id of ids) {
       const tag = await this.tagRepository.findOne({ parentId: id });
       if (tag?.id) {
         throw new ConflictException('请先删除子标签');
       }
     }
-    
+
     try {
       const deletingTag: DeleteResult = await this.tagRepository.delete(ids);
 

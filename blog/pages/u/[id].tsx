@@ -4,6 +4,7 @@ import { queryUserService } from "../../lib/services/user.service";
 import { AVATAR_LG, AVATAR_XL } from "../../lib/contants";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
+import classNames from "classnames";
 
 type Props = {
   user: any;
@@ -22,7 +23,7 @@ const Profile: React.FunctionComponent<Props> = ({ user }) => {
           <span className="w-full h-full absolute opacity-50 bg-gradient-tr-primary-2"></span>
         </div>
         <Container full={true}>
-          <section className="relative block" style={{ height: "500px" }}>
+          <section className="relative block" style={{ height: "300px" }}>
             <div
               className="top-auto bottom-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden"
               style={{ height: "70px", transform: "translateZ(0)" }}
@@ -85,7 +86,7 @@ const Profile: React.FunctionComponent<Props> = ({ user }) => {
                         </div>
                         <div className="lg:mr-4 p-3 text-center">
                           <span className="text-xl font-bold block uppercase tracking-wide text-gray-700">
-                            {user.bookmarksCount}
+                            {user.favoritesCount}
                           </span>
                           <span className="text-sm text-gray-500">收藏</span>
                         </div>
@@ -124,6 +125,48 @@ const Profile: React.FunctionComponent<Props> = ({ user }) => {
                         </a>
                       </div>
                     </div>
+                  </div>
+                  <div className="mt-10 py-10 border-t text-center">
+                    <button
+                      className={classNames(
+                        "px-2 py-1 border-b-2 border-gray-400 text-gray-500 hover:opacity-75 focus:outline-none hover:opacity-75 text-xs",
+                        {
+                          "border-primary-1 text-primary-1": true,
+                        }
+                      )}
+                    >
+                      文章
+                    </button>{" "}
+                    <button
+                      className={classNames(
+                        "px-2 py-1 border-b-2 border-gray-400 text-gray-500 hover:opacity-75 focus:outline-none hover:opacity-75 text-xs",
+                        {
+                          "border-primary-1 text-primary-1": false,
+                        }
+                      )}
+                    >
+                      动态
+                    </button>{" "}
+                    <button
+                      className={classNames(
+                        "px-2 py-1 border-b-2 border-gray-400 text-gray-500 hover:opacity-75 focus:outline-none hover:opacity-75 text-xs",
+                        {
+                          "border-primary-1 text-primary-1": false,
+                        }
+                      )}
+                    >
+                      最新评论
+                    </button>{" "}
+                    <button
+                      className={classNames(
+                        "px-2 py-1 border-b-2 border-gray-400 text-gray-500 hover:opacity-75 focus:outline-none hover:opacity-75 text-xs",
+                        {
+                          "border-primary-1 text-primary-1": false,
+                        }
+                      )}
+                    >
+                      热门
+                    </button>
                   </div>
                 </div>
               </div>

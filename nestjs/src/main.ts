@@ -6,12 +6,21 @@ import { TransformInterceptor } from './shared/transform.interceptor';
 import * as rateLimit from 'express-rate-limit';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import * as helmet from 'helmet';
+import * as compression from 'compression';
+import * as DDOS from 'ddos';
+import * as bodyParser from 'body-parser';
+import { noop } from 'rxjs';
+import { setupMorgan } from './morgan';
+import * as csurf from 'csurf';
 
 const PORT = process.env.APP_PORT || 3000;
 const PREFIX = process.env.API_PREFIX || 'api';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   // 允许跨域资源共享 端口80不可为 http:xxx:80
   app.enableCors({
@@ -62,6 +71,36 @@ async function bootstrap() {
       },
     }),
   );
+
+  // 压缩可以大大减小响应主体的大小，从而提高 Web 应用程序的速度
+  app.use(compression());
+
+  // 应用层DDOS保护
+  const ddos = new DDOS({ burst: 10, limit: 15 });
+  isDevelopment ? noop() : app.use(ddos.express);
+
+  // 拒绝已知的REST API漏洞
+  // app.use(helmet.hidePoweredBy({ setTo: 'PHP/5.3.2' }));
+  app.use(helmet.hidePoweredBy()); // Remove the X-Powered-By header
+  app.use(helmet.frameguard({ action: 'deny' }));
+  app.use(helmet.noSniff()); // Keep clients from sniffing the MIME type
+  app.use(helmet.xssFilter()); // Adds some small XSS protections
+  app.use(helmet.referrerPolicy()); // Hide the Referer header
+  app.use(helmet.hsts()); // HTTP Strict Transport Security
+
+  // 健康检查URL @ index.html
+  const K = '哎呀，这里什么都没有:)';
+  app.use('/index.html', (request: any, response: any) => response.send(K));
+
+  // 添加对BODY/ url编码的REST api的支持
+  app.use(bodyParser.urlencoded({ extended: true, limit: '8mb' }));
+  app.use(bodyParser.json({ limit: '8mb' }));
+
+  // 跨站点请求伪造（称为 CSRF 或 XSRF）
+  // app.use(csurf());
+
+  // 设置写入日志
+  setupMorgan(app);
 
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',

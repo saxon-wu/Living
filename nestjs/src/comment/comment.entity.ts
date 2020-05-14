@@ -82,47 +82,4 @@ export class CommentEntity extends SharedEntity {
   repliesCount: number;
 
   isOwnership: boolean = false;
-
-  /**
-   * @description 返回对象
-   * @author Saxon
-   * @date 2020-03-13
-   * @param {boolean} [isAdminSide=false]
-   * @returns
-   * @memberof CommentEntity
-   */
-  toResponseObject(isAdminSide: boolean = false): ICommentOutput {
-    const {
-      id,
-      uuid,
-      content,
-      createdAt,
-      updatedAt,
-      commenter,
-      likes,
-      replies,
-      isOwnership,
-      likesCount,
-      repliesCount,
-    } = this;
-    const common = {
-      content,
-      createdAt,
-      isOwnership,
-      commenter: commenter?.toResponseObject() || null,
-      likes: likes?.map(v => v.toResponseObject()) || null,
-      replies: replies?.map(v => v.toResponseObject()) || null,
-      likesCount,
-      repliesCount,
-    };
-    if (isAdminSide) {
-      return {
-        id,
-        uuid,
-        updatedAt,
-        ...common,
-      };
-    }
-    return { id: uuid, ...common };
-  }
 }

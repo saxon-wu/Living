@@ -8,6 +8,7 @@ import {
   OneToMany,
   RelationCount,
   OneToOne,
+  Index,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { UserEntity } from '@src/user/user.entity';
@@ -46,7 +47,7 @@ export class ArticleEntity extends SharedEntity {
   @Column({
     type: 'boolean',
     name: 'is_public',
-    default: false,
+    default: true,
     comment: '文章是否公开，即是不是草稿',
   })
   isPublic: boolean;
@@ -90,12 +91,12 @@ export class ArticleEntity extends SharedEntity {
    */
   @ManyToMany(
     type => UserEntity,
-    user => user.bookmarks,
+    user => user.favorites,
   )
-  bookmarkUsers: UserEntity[];
+  favoriteUsers: UserEntity[];
 
-  @RelationCount((articleEntity: ArticleEntity) => articleEntity.bookmarkUsers)
-  bookmarkUsersCount: number;
+  @RelationCount((articleEntity: ArticleEntity) => articleEntity.favoriteUsers)
+  favoriteUsersCount: number;
   /**
    * @description 文章的评论
    * @type {CommentEntity[]}
@@ -122,57 +123,4 @@ export class ArticleEntity extends SharedEntity {
   tags: TagEntity[];
 
   isOwnership: boolean = false;
-
-  /**
-   * @description 返回对象
-   * @author Saxon
-   * @date 2020-03-11
-   * @param {boolean} [isAdminSide=false]
-   * @returns
-   * @memberof ArticleEntity
-   */
-  toResponseObject(isAdminSide: boolean = false): IArticleOutput {
-    const {
-      id,
-      uuid,
-      title,
-      content,
-      createdAt,
-      updatedAt,
-      publisher,
-      likes,
-      bookmarkUsers,
-      status,
-      isOwnership,
-      isPublic,
-      cover,
-      likesCount,
-      bookmarkUsersCount,
-      commentsCount,
-    } = this;
-    const common = {
-      title,
-      content,
-      createdAt,
-      updatedAt,
-      isOwnership,
-      isPublic,
-      cover: cover?.toResponseObject() || null,
-      publisher: publisher?.toResponseObject() || null,
-      likes: likes?.map(v => v.toResponseObject()) || null,
-      bookmarkUsers: bookmarkUsers?.map(v => v.toResponseObject()) || null,
-      likesCount,
-      bookmarkUsersCount,
-      commentsCount,
-    };
-    if (isAdminSide) {
-      return {
-        id,
-        uuid,
-        status,
-        ...common,
-      };
-    }
-    return { id: uuid, ...common };
-  }
 }

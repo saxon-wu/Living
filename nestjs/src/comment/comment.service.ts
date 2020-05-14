@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentEntity } from './comment.entity';
 import { Repository } from 'typeorm';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { CreateCommentDTO } from './comment.dto';
 import { ArticleService } from '@src/article/article.service';
 import { UserEntity } from '@src/user/user.entity';
@@ -92,26 +92,14 @@ export class CommentService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-13
-   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
-   * @param {boolean} [returnsEntity=false]
-   * @returns {(Promise<CommentEntity | ICommentOutput>)}
+   * @param {UUIDParamDTO} paramDTO
+   * @returns {Promise<CommentEntity>}
    * @memberof CommentService
    */
-  async findOneForComment(
-    paramDTO: UUIDParamDTO | IdParamDTO,
-    returnsEntity: boolean = false,
-  ): Promise<CommentEntity | ICommentOutput> {
+  async findOneForComment(paramDTO: UUIDParamDTO): Promise<CommentEntity> {
     let comment: CommentEntity;
-    if ((paramDTO as UUIDParamDTO).uuid) {
-      const { uuid } = <UUIDParamDTO>paramDTO;
-      comment = await this.commentRepository.findOne(
-        { uuid },
-        {
-          relations: this.relations,
-        },
-      );
-    } else if ((paramDTO as IdParamDTO).id) {
-      const { id } = <IdParamDTO>paramDTO;
+    if ((paramDTO as UUIDParamDTO).id) {
+      const { id } = <UUIDParamDTO>paramDTO;
       comment = await this.commentRepository.findOne(id, {
         relations: this.relations,
       });
@@ -125,38 +113,37 @@ export class CommentService {
 
     this.parentChildRelationship(comment.replies);
 
-    if (returnsEntity) {
-      return comment;
-    }
-    return comment.toResponseObject();
+    // if (returnsEntity) {
+    //   return comment;
+    // }
+    return comment;
   }
 
   /**
    * @description 查询所有评论
    * @author Saxon
    * @date 2020-03-13
-   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
+   * @param {UUIDParamDTO} paramDTO
    * @param {IPaginationOptions} options
+   * @param {SortEnum} sort
    * @param {boolean} [isAdminSide=false]
-   * @returns {Promise<Pagination<ICommentOutput>>}
+   * @returns {Promise<Pagination<CommentEntity>>}
    * @memberof CommentService
    */
   async findAll(
-    paramDTO: UUIDParamDTO | IdParamDTO,
+    paramDTO: UUIDParamDTO,
     options: IPaginationOptions,
     sort: SortEnum,
     isAdminSide: boolean = false,
-  ): Promise<Pagination<ICommentOutput>> {
+  ): Promise<Pagination<CommentEntity>> {
     const article = <ArticleEntity>(
-      await this.articleService.findOneForArticle(
-        paramDTO,
-        /* returnsEntity */ true,
-      )
+      await this.articleService.findOneForArticle(paramDTO)
     );
 
-    const queryBuilder = this.commentRepository.createQueryBuilder(this.table);
-    queryBuilder.where(`article_id=${article.id}`);
-    queryBuilder.orderBy(`${this.table}.createdAt`, sort);
+    const queryBuilder = this.commentRepository
+      .createQueryBuilder(this.table)
+      .where(`${this.table}.article_id = :articleId`, { articleId: article.id })
+      .orderBy(`${this.table}.createdAt`, sort);
 
     for (const item of transformRelations(this.table, this.relations)) {
       queryBuilder.leftJoinAndSelect(item.property, item.alias);
@@ -167,27 +154,15 @@ export class CommentService {
       options,
     );
 
-    if (isAdminSide) {
-      return {
-        ...comments,
-        items: comments.items.map(v => {
-          if (v.commenter.id === article.publisher.id) {
-            v.isOwnership = true;
-          }
-          this.parentChildRelationship(v.replies, article);
-          return v.toResponseObject(/**isAdminSide */ true);
-        }),
-      };
-    }
-
     return {
       ...comments,
       items: comments.items.map(v => {
         if (v.commenter.id === article.publisher.id) {
           v.isOwnership = true;
         }
+
         this.parentChildRelationship(v.replies, article);
-        return v.toResponseObject();
+        return v;
       }),
     };
   }
@@ -200,9 +175,7 @@ export class CommentService {
    * @returns {(Promise<CommentEntity | ICommentOutput>)}
    * @memberof CommentService
    */
-  async findOne(
-    paramDTO: UUIDParamDTO,
-  ): Promise<CommentEntity | ICommentOutput> {
+  async findOne(paramDTO: UUIDParamDTO): Promise<CommentEntity> {
     return await this.findOneForComment(paramDTO);
   }
 
@@ -218,11 +191,11 @@ export class CommentService {
   async create(
     createCommentDTO: CreateCommentDTO,
     user: UserEntity,
-  ): Promise<ICommentOutput> {
+  ): Promise<CommentEntity> {
     const { content, articleId } = createCommentDTO;
 
     const article = <ArticleEntity>(
-      await this.articleService.findOneForArticle({ uuid: articleId }, true)
+      await this.articleService.findOneForArticle({ id: articleId })
     );
 
     // 发表评论
@@ -231,7 +204,7 @@ export class CommentService {
     creatingComment.article = article;
     try {
       const savingComment = await this.commentRepository.save(creatingComment);
-      return savingComment.toResponseObject();
+      return savingComment;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -247,16 +220,10 @@ export class CommentService {
    * @returns {Promise<ICommentOutput>}
    * @memberof CommentService
    */
-  async like(
-    paramDTO: UUIDParamDTO,
-    user: UserEntity,
-  ): Promise<ICommentOutput> {
+  async like(paramDTO: UUIDParamDTO, user: UserEntity): Promise<CommentEntity> {
     // 评论
-    const { uuid } = paramDTO;
-    const comment = (await this.findOneForComment(
-      { uuid },
-      true,
-    )) as CommentEntity;
+    const { id } = paramDTO;
+    const comment = (await this.findOneForComment({ id })) as CommentEntity;
     // 本用户对该评论的点赞数，作为点赞的反相操作
     const likeOfCurrentUser: number = comment.likes.filter(
       v => v.id === user.id,
@@ -274,7 +241,7 @@ export class CommentService {
     try {
       // 上面取到的comment已包含关联数据，这里save之后也保留着先前的数据，包含已修改和未修改的
       const savingComment = await this.commentRepository.save(comment);
-      return savingComment.toResponseObject();
+      return savingComment;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');

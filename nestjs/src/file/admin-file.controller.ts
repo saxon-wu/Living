@@ -16,6 +16,7 @@ import { UserEntity } from '@src/user/user.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { IFileOutput } from './file.interface';
 import { UUIDParamDTO } from '@src/shared/shared.dto';
+import { FileEntity } from './file.entity';
 
 const MANY = 'files';
 const ONE = 'file';
@@ -30,7 +31,7 @@ export class AdminFileController {
     @Query('current') page: number = 1,
     @Query('pageSize') limit: number = 10,
     @User() user: UserEntity,
-  ): Promise<Pagination<IFileOutput>> {
+  ): Promise<Pagination<FileEntity>> {
     // nestjs 7.0 自动转换number,bool未传时则为NaN,false
     if (isNaN(page)) page = 1;
     if (isNaN(limit)) limit = 10;

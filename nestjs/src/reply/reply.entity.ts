@@ -72,46 +72,7 @@ export class ReplyEntity extends SharedEntity {
     name: 'parent_id',
     default: 0,
   })
-  parentId: number;
+  parentId: string;
 
   isOwnership: boolean = false;
-
-  /**
-   * @description 返回对象
-   * @author Saxon
-   * @date 2020-03-13
-   * @param {boolean} [isAdminSide=false]
-   * @returns
-   * @memberof ReplyEntity
-   */
-  toResponseObject(isAdminSide: boolean = false): IReplyOutput {
-    const {
-      id,
-      uuid,
-      createdAt,
-      updatedAt,
-      replier,
-      likes,
-      content,
-      isOwnership,
-      likesCount,
-    } = this;
-    const common = {
-      content,
-      createdAt,
-      isOwnership,
-      replier: replier?.toResponseObject() || null,
-      likes: likes?.map(v => v.toResponseObject()) || null,
-      likesCount,
-    };
-    if (isAdminSide) {
-      return {
-        id,
-        uuid,
-        updatedAt,
-        ...common,
-      };
-    }
-    return { id: uuid, ...common };
-  }
 }

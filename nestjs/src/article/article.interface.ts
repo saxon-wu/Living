@@ -31,8 +31,8 @@ export interface IArticleOutput {
   readonly publisher: IUserOutput | null;
   readonly likes: IUserOutput[] | null;
   readonly likesCount: number;
-  readonly bookmarkUsers: IUserOutput[] | null;
-  readonly bookmarkUsersCount: number;
+  readonly favoriteUsers: IUserOutput[] | null;
+  readonly favoriteUsersCount: number;
   readonly status?: ArticleStatusEnum;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;

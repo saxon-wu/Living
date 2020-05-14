@@ -11,7 +11,7 @@ import {
   flatten,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { CreateTagDTO, UpdateTagDTO } from './tag.dto';
 import { User } from '@src/shared/user.decorator';
 import { UserEntity } from '@src/user/user.entity';
@@ -22,6 +22,7 @@ import {
   Pagination,
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
+import { TagEntity } from './tag.entity';
 
 const MANY = 'tags';
 const ONE = 'tag';
@@ -49,21 +50,21 @@ export class AdminTagController {
   async create(
     @Body() tagDTO: CreateTagDTO,
     @User() user: UserEntity,
-  ): Promise<ITagOutput> {
+  ): Promise<TagEntity> {
     return await this.tagService.create(tagDTO, user);
   }
 
   @Put(`${ONE}/:id`)
   async update(
-    @Param() paramDTO: IdParamDTO,
+    @Param() paramDTO: UUIDParamDTO,
     @Body() tagDTO: UpdateTagDTO,
     @User() user: UserEntity,
-  ): Promise<ITagOutput | string> {
+  ): Promise<TagEntity | string> {
     return await this.tagService.updateForAdmin(paramDTO, tagDTO, user);
   }
 
   @Delete(`${ONE}/destruct`)
-  async destroy( @Query('ids') ids: number[]): Promise<string> {
+  async destroy(@Query('ids') ids: string[]): Promise<string> {
     /* ids 是string 或 array, 用flatten()处理为数组 */
     return await this.tagService.destroy(flatten([ids]));
   }

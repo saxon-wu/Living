@@ -53,13 +53,13 @@ describe('Article Controller', () => {
         },
         likes: expect.any(Array),
         likesCount: expect.any(Number),
-        bookmarkUsers: [
+        favoriteUsers: [
           {
             id: expect.any(String),
             username: expect.any(String),
           },
         ],
-        bookmarkUsersCount: expect.any(Number),
+        favoriteUsersCount: expect.any(Number),
       });
 
       randomArticleUUID = articles[random(articles.length)].id;
@@ -81,8 +81,8 @@ describe('Article Controller', () => {
         publisher: expect.any(Object),
         likes: expect.any(Array),
         likesCount: expect.any(Number),
-        bookmarkUsers: expect.any(Array),
-        bookmarkUsersCount: expect.any(Number),
+        favoriteUsers: expect.any(Array),
+        favoriteUsersCount: expect.any(Number),
       });
       done();
     });
@@ -183,7 +183,7 @@ describe('Article Controller', () => {
     });
   });
 
-  describe('bookmark', () => {
+  describe('favorites', () => {
     const testTitle = '收藏取消收藏文章';
     it(testTitle, async done => {
       // const otherUsers = usersEntity.filter(v => v.uuid !== login.id)
@@ -211,22 +211,22 @@ describe('Article Controller', () => {
       // 指定的随机用户的随机文章的uuid
       const specifiedRandomArticleUUID = specifiedRandomArticle.uuid;
 
-      const bookmarkArticle = await articleController.bookmark(
+      const favoriteArticle = await articleController.favorites(
         { uuid: specifiedRandomArticleUUID },
         userEntity,
       );
       // 取消操作还是收藏操作
-      const IsSpecifiedRandomArticleInbookmark = bookmarkArticle.bookmarks.find(
+      const IsSpecifiedRandomArticleInfavorite = favoriteArticle.favorites.find(
         v => v.id === specifiedRandomArticle.uuid,
       );
-      if (IsSpecifiedRandomArticleInbookmark?.id) {
+      if (IsSpecifiedRandomArticleInfavorite?.id) {
         //收藏操作
-        expect(IsSpecifiedRandomArticleInbookmark).toHaveProperty(
+        expect(IsSpecifiedRandomArticleInfavorite).toHaveProperty(
           'content',
           specifiedRandomArticle.content,
         );
       }
-      expect(bookmarkArticle).toHaveProperty('username');
+      expect(favoriteArticle).toHaveProperty('username');
 
       done();
     });

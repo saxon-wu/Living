@@ -42,7 +42,7 @@ const ArticleList: React.FC<IArticleListProps> = ({ updateArticleFromModel }) =>
     },
     {
       title: '获藏数',
-      dataIndex: 'bookmarkUsersCount',
+      dataIndex: 'favoriteUsersCount',
       sorter: true,
     },
     {

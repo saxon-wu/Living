@@ -5,16 +5,14 @@ import {
   Column,
   Generated,
   DeleteDateColumn,
+  Index,
 } from 'typeorm';
 import { formatDate } from './helper.util';
 
 export class SharedEntity {
-  @PrimaryGeneratedColumn()
-  public id: number;
-
-  @Generated('uuid')
-  @Column()
-  public uuid: string;
+  @PrimaryGeneratedColumn('uuid')
+  @Index({ unique: true })
+  public id: string;
 
   @CreateDateColumn({
     name: 'created_at',

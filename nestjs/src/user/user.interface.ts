@@ -12,8 +12,8 @@ export interface IUserOutput {
   readonly uuid?: string;
   readonly username: string;
   readonly tokenObject?: IAccessTokenOutput;
-  readonly bookmarks: IArticleOutput[] | null;
-  readonly bookmarksCount: number;
+  readonly favorites: IArticleOutput[] | null;
+  readonly favoritesCount: number;
   readonly articles: IArticleOutput[] | null;
   readonly articlesCount: number;
   readonly likeArticles: IArticleOutput[] | null;

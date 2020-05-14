@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Date from "../components/Date";
 import { DayTypeEnum } from "../lib/enum";
-import { AVATAR_SM } from "../lib/contants";
+import { AVATAR_SM, COVER_SM_VERTICAL } from "../lib/contants";
 
 type Props = {
   data: {
@@ -31,10 +31,10 @@ type Props = {
       avatar: {
         url: string;
       };
-      bookmarks: any[] | null;
+      favorites: any[] | null;
       articles: any[] | null;
       likeArticles: any[] | null;
-      bookmarksCount: number;
+      favoritesCount: number;
       articlesCount: number;
       likeArticlesCount: number;
     }>;
@@ -54,16 +54,18 @@ const HorizontalCard: React.FunctionComponent<Props> = ({ data }) => {
     likes,
   } = data;
 
+  // const onload = () => {
+
+  // }
+
   return (
     <div className="flex items-stretch bg-gray-100 h-48 rounded-lg mb-2">
       <div
         className="flex-none px-4 py-2 m-2 w-24 bg-cover overflow-hidden rounded-lg"
         style={{
-          backgroundImage: `url(${
-            cover?.url ?? "https://www.tailwindcss.cn/img/card-left.jpg"
-          })`,
+          backgroundImage: `url(${cover?.url + COVER_SM_VERTICAL})`,
         }}
-        title="Woman holding a mug"
+        title={title}
       ></div>
       <div className="flex-1 flex bg-white px-4 py-2 m-2 flex-col justify-between leading-normal rounded-lg">
         <div className="mb-3">

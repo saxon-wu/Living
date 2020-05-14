@@ -36,7 +36,7 @@ const Container: React.FunctionComponent<Props> = ({
     >
       <motion.div
         variants={containerVariants}
-        className={classnames(`${className}`, {
+        className={classnames(`${className?? ''}`, {
           "container mx-auto px-5": !full,
         })}
       >

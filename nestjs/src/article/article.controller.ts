@@ -19,6 +19,7 @@ import { UserEntity } from '@src/user/user.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { IArticleOutput } from './article.interface';
 import { IUserOutput } from '@src/user/user.interface';
+import { ArticleEntity } from './article.entity';
 
 const MANY = 'articles';
 const ONE = 'article';
@@ -31,20 +32,20 @@ export class ArticleController {
   async findAll(
     @Query('current') page: number = 1,
     @Query('pageSize') limit: number = 10,
-  ): Promise<Pagination<IArticleOutput>> {
+  ): Promise<Pagination<ArticleEntity>> {
     // nestjs 7.0 自动转换number,bool未传时则为NaN,false
     if (isNaN(page)) page = 1;
     if (isNaN(limit)) limit = 10;
     return await this.articleService.findAll({ page, limit });
   }
 
-  @Get(`${ONE}/:uuid`)
+  @Get(`${ONE}/:id`)
   async findOne(
     @Param() paramDTO: UUIDParamDTO,
     @User() user: UserEntity | undefined,
-  ): Promise<IArticleOutput> {
+  ): Promise<ArticleEntity> {
     // user 的作用是 无需守卫时提供用户信息，以方便判定所有者
-    return <IArticleOutput>(
+    return <ArticleEntity>(
       await this.articleService.findOne(paramDTO, user || null)
     );
   }
@@ -54,22 +55,22 @@ export class ArticleController {
   async create(
     @Body() articleDTO: CreateArticleDTO,
     @User() user: UserEntity,
-  ): Promise<IArticleOutput> {
+  ): Promise<ArticleEntity> {
     return await this.articleService.create(articleDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Put(`${ONE}/:uuid`)
+  @Put(`${ONE}/:id`)
   async update(
     @Param() articleParamDTO: UUIDParamDTO,
     @Body() articleDTO: UpdateArticleDTO,
     @User() user: UserEntity,
-  ): Promise<IArticleOutput | string> {
+  ): Promise<ArticleEntity | string> {
     return await this.articleService.update(articleParamDTO, articleDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Delete(`${ONE}/:uuid`)
+  @Delete(`${ONE}/:id`)
   async softDelete(
     @Param() articleParamDTO: UUIDParamDTO,
     @User() user: UserEntity,
@@ -78,7 +79,7 @@ export class ArticleController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(`${ONE}/:uuid`)
+  @Patch(`${ONE}/:id`)
   async softRestore(
     @Param() articleParamDTO: UUIDParamDTO,
     user: UserEntity,
@@ -87,20 +88,20 @@ export class ArticleController {
   }
 
   @UseGuards(AuthGuard)
-  @Post(`${ONE}/:uuid/like`)
+  @Post(`${ONE}/:id/like`)
   async like(
     @Param() articleParamDTO: UUIDParamDTO,
     @User() user: UserEntity,
-  ): Promise<IArticleOutput> {
+  ): Promise<ArticleEntity> {
     return await this.articleService.like(articleParamDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Post(`${ONE}/:uuid/bookmark`)
-  async bookmark(
+  @Post(`${ONE}/:id/favorite`)
+  async favorites(
     @Param() articleParamDTO: UUIDParamDTO,
     @User() user: UserEntity,
-  ): Promise<IUserOutput> {
-    return await this.articleService.bookmark(articleParamDTO, user);
+  ): Promise<UserEntity> {
+    return await this.articleService.favorites(articleParamDTO, user);
   }
 }

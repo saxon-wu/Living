@@ -26,32 +26,37 @@ describe('测试完整流程', () => {
   });
 
   // describe('注册用户', () => {
-  //   for (let i = 0; i < 10; i++) {
-  //     it(`/${API_VERSION}/auth/register (POST)`, async (done) => {
-  //       const response = await request(server)
-  //         .post(`/${API_VERSION}/auth/register`)
-  //         .send({
-  //           username: faker.name.firstName(),
-  //           password,
-  //         })
-  //         .expect(201);
-  //       const register = response.body;
-  //       expect(register).toMatchSnapshot({
-  //         id: expect.any(String),
-  //         username: expect.any(String),
-  //         accessToken: expect.any(String),
-  //         expiresIn: expect.any(Number),
-  //       });
-  //       accessToken = register.accessToken;
-  //       done();
-  //     });
-  //   }
+  //   /** TODO:注册时会自动生成头像，生成图片是异步的，与其它生成图片的任务重叠，导致生成图片指令方与接收方不一致，需要任务队列解决 */
+
+  //   // for (let i = 0; i < 10; i++) {
+  //   it(`/${API_VERSION}/auth/register (POST)`, async done => {
+  //     const username = faker.name.firstName()
+  //     const response = await request(server)
+  //       .post(`/${API_VERSION}/auth/register`)
+  //       .send({
+  //         username,
+  //         password,
+  //       })
+  //       .expect(201);
+  //     const register = response.body;
+  //     // expect(register).toMatchSnapshot({
+  //     //   id: expect.any(String),
+  //     //   username: expect.any(String),
+  //     //   accessToken: expect.any(String),
+  //     //   expiresIn: expect.any(Number),
+  //     // });
+  //     expect(register).toHaveProperty('id', expect.any(String));
+  //     expect(register).toHaveProperty('username', username);
+  //     expect(register).toHaveProperty('accessToken', expect.any(String));
+  //     expect(register).toHaveProperty('expiresIn', expect.any(Number));
+  //     accessToken = register.accessToken;
+  //     done();
+  //   });
+  //   // }
   // });
 
-
-
   describe('获取所有用户', () => {
-    it(`/${API_VERSION}/users (GET)`, async (done) => {
+    it(`/${API_VERSION}/users (GET)`, async done => {
       const response = await request(server)
         .get(`/${API_VERSION}/users`)
         .expect(200);
@@ -64,7 +69,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机用户登录', () => {
-    it(`/${API_VERSION}/auth/login (POST)`, async (done) => {
+    it(`/${API_VERSION}/auth/login (POST)`, async done => {
       const response = await request(server)
         .post(`/${API_VERSION}/auth/login`)
         .send({
@@ -73,56 +78,60 @@ describe('测试完整流程', () => {
         })
         .expect(201);
       const login = response.body;
-      expect(login).toMatchSnapshot({
-        id: expect.any(String),
-        username: expect.any(String),
-        accessToken: expect.any(String),
-        expiresIn: expect.any(Number),
-      });
+      // expect(login).toMatchSnapshot({
+      //   id: expect.any(String),
+      //   username: expect.any(String),
+      //   accessToken: expect.any(String),
+      //   expiresIn: expect.any(Number),
+      // });
+      expect(login).toHaveProperty('id', expect.any(String));
+      expect(login).toHaveProperty('username', randomUser.username);
+      expect(login).toHaveProperty('accessToken', expect.any(String));
+      expect(login).toHaveProperty('expiresIn', expect.any(Number));
       accessToken = login.accessToken;
       done();
     });
   });
 
-  // describe('发布文章', () => {
-  //   it(`/${API_VERSION}/article (POST)`, async (done) => {
-  //     const title = faker.name.title();
-  //     const content = {
-  //       time: Date.now(),
-  //       blocks: [
-  //         {
-  //           type: 'header',
-  //           data: {
-  //             text: faker.name.title(),
-  //             level: Math.ceil(Math.random() * 6),
-  //           },
-  //         },
-  //         {
-  //           type: 'paragraph',
-  //           data: {
-  //             text: faker.lorem.paragraphs(),
-  //           },
-  //         },
-  //       ],
-  //       version: '2.17.0',
-  //     };
-  //     const response = await request(server)
-  //       .post(`/${API_VERSION}/article`)
-  //       .set('Authorization', `Bearer ${accessToken}`)
-  //       .send({
-  //         title,
-  //         content,
-  //       })
-  //       .expect(201);
-  //     const article = response.body;
-  //     expect(article).toHaveProperty('title', title);
-  //     expect(article).toHaveProperty('content', content);
-  //     done();
-  //   });
-  // });
+  describe('发布文章', () => {
+    it(`/${API_VERSION}/article (POST)`, async done => {
+      const title = faker.name.title();
+      const content = {
+        time: Date.now(),
+        blocks: [
+          {
+            type: 'header',
+            data: {
+              text: faker.name.title(),
+              level: Math.ceil(Math.random() * 6),
+            },
+          },
+          {
+            type: 'paragraph',
+            data: {
+              text: faker.lorem.paragraphs(),
+            },
+          },
+        ],
+        version: '2.17.0',
+      };
+      const response = await request(server)
+        .post(`/${API_VERSION}/article`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          title,
+          content,
+        })
+        .expect(201);
+      const article = response.body;
+      expect(article).toHaveProperty('title', title);
+      expect(article).toHaveProperty('content', content);
+      done();
+    });
+  });
 
   describe('获取所有文章', () => {
-    it(`/${API_VERSION}/article (GET)`, async (done) => {
+    it(`/${API_VERSION}/article (GET)`, async done => {
       const response = await request(server)
         .get(`/${API_VERSION}/articles`)
         .expect(200);
@@ -135,7 +144,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机为文章点赞或取消点赞', () => {
-    it(`/${API_VERSION}/article/:uuid/like (POST)`, async (done) => {
+    it(`/${API_VERSION}/article/:id/like (POST)`, async done => {
       const response = await request(server)
         .post(`/${API_VERSION}/article/${randomArticle.id}/like`)
         .set('Authorization', `Bearer ${accessToken}`)
@@ -148,9 +157,9 @@ describe('测试完整流程', () => {
   });
 
   describe('随机收藏或取消收藏文章', () => {
-    it(`/${API_VERSION}/article/:uuid/bookmark (POST)`, async (done) => {
+    it(`/${API_VERSION}/article/:id/favorite (POST)`, async done => {
       const response = await request(server)
-        .post(`/${API_VERSION}/article/${randomArticle.id}/bookmark`)
+        .post(`/${API_VERSION}/article/${randomArticle.id}/favorite`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(201);
       const user = response.body;
@@ -160,7 +169,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对文章评论', () => {
-    it(`/${API_VERSION}/comment (POST)`, async (done) => {
+    it(`/${API_VERSION}/comment (POST)`, async done => {
       const content = faker.lorem.lines();
       const response = await request(server)
         .post(`/${API_VERSION}/comment`)
@@ -175,7 +184,7 @@ describe('测试完整流程', () => {
   });
 
   describe('获取所有评论', () => {
-    it(`/${API_VERSION}/comment/article/:uuid (GET)`, async (done) => {
+    it(`/${API_VERSION}/comment/article/:id (GET)`, async done => {
       const response = await request(server)
         .get(`/${API_VERSION}/comments/article/${randomArticle.id}`)
         .expect(200);
@@ -188,7 +197,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对评论回复', () => {
-    it(`/${API_VERSION}/reply (POST)`, async (done) => {
+    it(`/${API_VERSION}/reply (POST)`, async done => {
       const content = faker.lorem.lines();
       const response = await request(server)
         .post(`/${API_VERSION}/reply`)
@@ -203,7 +212,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对评论点赞', () => {
-    it(`/${API_VERSION}/comment/:uuid/like (POST)`, async (done) => {
+    it(`/${API_VERSION}/comment/:id/like (POST)`, async done => {
       const content = faker.lorem.lines();
       const response = await request(server)
         .post(`/${API_VERSION}/comment/${randomComment.id}/like`)
@@ -216,7 +225,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对“回复”回复', () => {
-    it(`/${API_VERSION}/reply (POST)`, async (done) => {
+    it(`/${API_VERSION}/reply (POST)`, async done => {
       const randomReplyLength = randomComment.replies.length;
       if (!randomReplyLength) {
         console.error('同一评论没有可以回复的目标');
@@ -241,7 +250,7 @@ describe('测试完整流程', () => {
   });
 
   describe('随机对“回复”点赞', () => {
-    it(`/${API_VERSION}/reply/:uuid/like (POST)`, async (done) => {
+    it(`/${API_VERSION}/reply/:id/like (POST)`, async done => {
       const randomReplyLength = randomComment.replies.length;
       if (!randomReplyLength) {
         console.error('同一评论没有可以回复的点赞目标');
@@ -257,7 +266,6 @@ describe('测试完整流程', () => {
       done();
     });
   });
-
 
   afterAll(async () => {
     await app.close();

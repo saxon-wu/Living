@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
 import { validate } from 'class-validator';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import {
   paginate,
   Pagination,
@@ -27,7 +27,7 @@ export class UserService {
   private readonly logger: Logger = new Logger(UserService.name);
   private readonly relations = [
     'articles',
-    'bookmarks',
+    'favorites',
     'likeArticles',
     'avatar',
   ];
@@ -58,30 +58,21 @@ export class UserService {
    * @description 依据uuid查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-03-11
-   * @param {(UUIDParamDTO | IdParamDTO)} userParamDTO
-   * @param {boolean} [returnsEntity=false]
-   * @returns {(Promise<UserEntity | IUserOutput>)}
+   * @param {UUIDParamDTO} userParamDTO
+   * @returns {Promise<UserEntity>}
    * @memberof UserService
    */
-  async findOneForUser(
-    userParamDTO: UUIDParamDTO | IdParamDTO,
-    returnsEntity: boolean = false,
-  ): Promise<UserEntity | IUserOutput> {
+  async findOneForUser(userParamDTO: UUIDParamDTO): Promise<UserEntity> {
     const queryBuilder = this.userRepository.createQueryBuilder(this.table);
-    if ((userParamDTO as UUIDParamDTO).uuid) {
-      const { uuid } = <UUIDParamDTO>userParamDTO;
-      queryBuilder.where('user.uuid = :uuid', { uuid });
-    } else if ((userParamDTO as IdParamDTO).id) {
-      const { id } = <IdParamDTO>userParamDTO;
-      queryBuilder.where('user.id = :id', { id });
-    } else {
-      throw new BadRequestException('亲，传入的参数不正确');
-    }
+
+    const { id } = <UUIDParamDTO>userParamDTO;
+    queryBuilder.where('user.id = :id', { id });
+
     const user = await queryBuilder
       .leftJoinAndSelect('user.avatar', 'avatar')
       /** 已替换成@RelationCount */
       // .loadRelationCountAndMap('articles.articlesCount', 'user.articles')
-      // .loadRelationCountAndMap('bookmarks.bookmarksCount', 'user.bookmarks')
+      // .loadRelationCountAndMap('favorites.favoritesCount', 'user.favorites')
       // .loadRelationCountAndMap(
       //   'likeArticles.likeArticlesCount',
       //   'user.likeArticles',
@@ -91,10 +82,8 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('用户不存在');
     }
-    if (returnsEntity) {
-      return user;
-    }
-    return user.toResponseObject();
+
+    return user;
   }
 
   /**
@@ -109,43 +98,31 @@ export class UserService {
   async findAll(
     options: IPaginationOptions,
     isAdminSide: boolean = false,
-  ): Promise<Pagination<IUserOutput>> {
+  ): Promise<Pagination<UserEntity>> {
     const queryBuilder = this.userRepository.createQueryBuilder(this.table);
-    for (const item of transformRelations(this.table, this.relations)) {
-      queryBuilder.leftJoinAndSelect(item.property, item.alias);
-    }
+    queryBuilder.orderBy(`${this.table}.createdAt`, 'DESC');
+    // for (const item of transformRelations(this.table, this.relations)) {
+    //   queryBuilder.leftJoinAndSelect(item.property, item.alias);
+    // }
 
     const users: Pagination<UserEntity> = await paginate<UserEntity>(
       queryBuilder,
       options,
     );
-    if (isAdminSide) {
-      return {
-        ...users,
-        items: users.items.map(v => v.toResponseObject(/**isAdminSide */ true)),
-      };
-    }
 
-    return {
-      ...users,
-      items: users.items.map(v => v.toResponseObject()),
-    };
+    return users;
   }
 
   /**
    * @description 查询一条
    * @author Saxon
    * @date 2020-03-11
-   * @param {(UUIDParamDTO | IdParamDTO)} paramDTO
-   * @param {boolean} [returnsEntity=false]
-   * @returns {(Promise<UserEntity | IUserOutput>)}
+   * @param {UUIDParamDTO} paramDTO
+   * @returns {Promise<UserEntity>}
    * @memberof UserService
    */
-  async findOne(
-    paramDTO: UUIDParamDTO | IdParamDTO,
-    returnsEntity: boolean = false,
-  ): Promise<UserEntity | IUserOutput> {
-    return await this.findOneForUser(paramDTO, returnsEntity);
+  async findOne(paramDTO: UUIDParamDTO): Promise<UserEntity> {
+    return await this.findOneForUser(paramDTO);
   }
 
   /**
@@ -157,8 +134,8 @@ export class UserService {
    * @memberof UserService
    */
   async destroy(user: UserEntity): Promise<string> {
-    const { uuid } = user;
-    const _user = await this.findOneForUser({ uuid });
+    const { id } = user;
+    const _user = await this.findOneForUser({ id });
 
     try {
       const destroyingUser = await this.userRepository.delete(_user.id);
@@ -173,15 +150,30 @@ export class UserService {
   }
 
   /**
-   * @description 给article服务层调用
+   * @description 创建收藏记录
+   * 给article服务层调用
    * @author Saxon
    * @date 2020-03-12
    * @param {UserEntity} user
    * @returns {Promise<UserEntity>}
    * @memberof UserService
    */
-  async bookmark(user: UserEntity): Promise<UserEntity> {
+  async createFavorite(user: UserEntity): Promise<UserEntity> {
     return await this.userRepository.save(user);
+  }
+
+  /**
+   * @description 获取所有收藏记录
+   * @author Saxon
+   * @date 2020-05-12
+   * @param {UserEntity} user
+   * @returns {Promise<UserEntity>}
+   * @memberof UserService
+   */
+  async findAllFavorites(user: UserEntity): Promise<UserEntity> {
+    return await this.userRepository.findOne(user.id, {
+      relations: ['favorites'],
+    });
   }
 
   /**
@@ -196,7 +188,7 @@ export class UserService {
   async update(userDTO: UpdateUserDTO, user: UserEntity) {
     const { avatarId } = userDTO;
 
-    const file = plainToClass(FileEntity, { uuid: avatarId });
+    const file = plainToClass(FileEntity, { id: avatarId });
 
     try {
       const updatingUser = await this.userRepository.update(user.id, {
@@ -242,18 +234,18 @@ export class UserService {
    * @description 更新[后台专用]
    * @author Saxon
    * @date 2020-04-03
-   * @param {IdParamDTO} idParamDTO
+   * @param {UUIDParamDTO} paramDTO
    * @param {UpdateUserForAdminDTO} userDTO
    * @returns {Promise<string>}
    * @memberof UserService
    */
   async updateForAdmin(
-    idParamDTO: IdParamDTO,
+    paramDTO: UUIDParamDTO,
     userDTO: UpdateUserForAdminDTO,
   ): Promise<string> {
-    const { id } = idParamDTO;
+    const { id } = paramDTO;
     const { status } = userDTO;
-    <UserEntity>await this.findOneForUser(idParamDTO, /* returnsEntity */ true);
+    <UserEntity>await this.findOneForUser(paramDTO);
 
     switch (status) {
       case UserStatusEnum.DISABLED:

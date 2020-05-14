@@ -11,7 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CommentEntity } from '@src/comment/comment.entity';
 import { Repository } from 'typeorm';
 import { ReplyEntity } from './reply.entity';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { CreateReplyDTO } from './reply.dto';
 import { UserEntity } from '@src/user/user.entity';
 import { IReplyOutput } from './reply.interface';
@@ -47,7 +47,7 @@ export class ReplyService {
    * @memberof ReplyService
    */
   ensureOwnership(user: UserEntity, reply: ReplyEntity): void {
-    if (reply.replier && (reply.replier.id as any) !== user.uuid) {
+    if (reply.replier && (reply.replier.id as any) !== user.id) {
       throw new ForbiddenException('亲，不是您的回复无法操作');
     }
   }
@@ -61,35 +61,18 @@ export class ReplyService {
    * @returns {(Promise<ReplyEntity | IReplyOutput>)}
    * @memberof ReplyService
    */
-  async findOneForReply(
-    paramDTO: UUIDParamDTO | IdParamDTO,
-    returnsEntity: boolean = false,
-  ): Promise<ReplyEntity | IReplyOutput> {
+  async findOneForReply(paramDTO: UUIDParamDTO): Promise<ReplyEntity> {
     let reply: ReplyEntity;
-    if ((paramDTO as UUIDParamDTO).uuid) {
-      const { uuid } = <UUIDParamDTO>paramDTO;
-      reply = await this.replyRepository.findOne(
-        { uuid },
-        {
-          relations: this.relations,
-        },
-      );
-    } else if ((paramDTO as IdParamDTO).id) {
-      const { id } = <IdParamDTO>paramDTO;
-      reply = await this.replyRepository.findOne(id, {
-        relations: this.relations,
-      });
-    } else {
-      throw new BadRequestException('亲，传入的参数不正确');
-    }
+    const { id } = paramDTO;
+    reply = await this.replyRepository.findOne(id, {
+      relations: this.relations,
+    });
 
     if (!reply) {
       throw new NotFoundException('回复不存在');
     }
-    if (returnsEntity) {
-      return reply;
-    }
-    return reply.toResponseObject();
+
+    return reply;
   }
 
   /**
@@ -104,22 +87,20 @@ export class ReplyService {
   async create(
     createReplyDTO: CreateReplyDTO,
     user: UserEntity,
-  ): Promise<IReplyOutput> {
+  ): Promise<ReplyEntity> {
     const { commentId, content, replyParentId } = createReplyDTO;
 
-    const comment = (await this.commentService.findOneForComment(
-      { uuid: commentId },
-      true,
-    )) as CommentEntity;
+    const comment = (await this.commentService.findOneForComment({
+      id: commentId,
+    })) as CommentEntity;
 
     const creating = this.replyRepository.create({ content });
     creating.comment = comment;
     creating.replier = user;
     if (replyParentId) {
-      const replyParent = (await this.findOneForReply(
-        { uuid: replyParentId },
-        true,
-      )) as ReplyEntity;
+      const replyParent = (await this.findOneForReply({
+        id: replyParentId,
+      })) as ReplyEntity;
       //   确保回复的目标也是同一条评论下的
       if (replyParent.comment && replyParent.comment.id !== comment.id) {
         throw new BadRequestException('亲，参数不正确哦');
@@ -129,7 +110,7 @@ export class ReplyService {
 
     try {
       const savingReply = await this.replyRepository.save(creating);
-      return savingReply.toResponseObject();
+      return savingReply;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -146,12 +127,12 @@ export class ReplyService {
    * @memberof ReplyService
    */
   async softDelete(paramDTO: UUIDParamDTO, user: UserEntity): Promise<string> {
-    const { uuid } = paramDTO;
+    const { id } = paramDTO;
     const reply = (await this.findOneForReply(paramDTO)) as ReplyEntity;
     this.ensureOwnership(user, reply);
 
     try {
-      const softDeletingReply = await this.replyRepository.softDelete({ uuid });
+      const softDeletingReply = await this.replyRepository.softDelete(id);
       if (!softDeletingReply.affected) {
         return '删除失败';
       }
@@ -172,12 +153,12 @@ export class ReplyService {
    * @memberof ReplyService
    */
   async softRestore(paramDTO: UUIDParamDTO, user: UserEntity): Promise<string> {
-    const { uuid } = paramDTO;
+    const { id } = paramDTO;
     const reply = (await this.findOneForReply(paramDTO)) as ReplyEntity;
     this.ensureOwnership(user, reply);
 
     try {
-      const softRestoringReply = await this.replyRepository.restore({ uuid });
+      const softRestoringReply = await this.replyRepository.restore({ id });
       if (!softRestoringReply.affected) {
         return '恢复失败';
       }
@@ -197,9 +178,9 @@ export class ReplyService {
    * @returns {Promise<IReplyOutput>}
    * @memberof ReplyService
    */
-  async like(paramDTO: UUIDParamDTO, user: UserEntity): Promise<IReplyOutput> {
-    const { uuid } = paramDTO;
-    const reply = (await this.findOneForReply({ uuid }, true)) as ReplyEntity;
+  async like(paramDTO: UUIDParamDTO, user: UserEntity): Promise<ReplyEntity> {
+    const { id } = paramDTO;
+    const reply = (await this.findOneForReply({ id })) as ReplyEntity;
     const likeOfCurrentUser: number = reply.likes.filter(v => v.id === user.id)
       .length;
 
@@ -215,7 +196,7 @@ export class ReplyService {
     try {
       // 上面取到的comment已包含关联数据，这里save之后也保留着先前的数据，包含已修改和未修改的
       const savingReply = await this.replyRepository.save(reply);
-      return savingReply.toResponseObject();
+      return savingReply;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');

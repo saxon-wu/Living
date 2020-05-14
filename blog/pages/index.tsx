@@ -5,6 +5,7 @@ import PostSidebar from "../components/PostSidebar";
 import { queryArticlesService } from "../lib/services/article.service";
 import { GetServerSideProps } from "next";
 import { useState, useEffect } from "react";
+import { isEmpty } from "lodash";
 
 type Props = {
   firstPagePosts: any;
@@ -16,7 +17,8 @@ const PostIndex: React.FunctionComponent<Props> = ({ firstPagePosts }) => {
 
   useEffect(() => {
     const items: any[] = firstPagePosts?.results?.items;
-    if (items) {
+
+    if (!isEmpty(items)) {
       setPostsState([...items]);
     }
   }, []);
@@ -58,9 +60,10 @@ const PostIndex: React.FunctionComponent<Props> = ({ firstPagePosts }) => {
       <Container>
         <div className="max-w-4xl mx-auto md:flex items-start py-8 px-12 md:px-0">
           <div className="w-full md:pr-12 mb-12">
-            {postsState.map((item: any, index) => (
-              <HorizontalCard key={index} data={item} />
-            ))}
+            {postsState.map(
+              (item: any, index) =>
+                !isEmpty(item) && <HorizontalCard key={index} data={item} />
+            )}
             <div className="flex justify-between text-xs">
               <button className="text-white no-underline py-2 px-3 rounded"></button>
               <button

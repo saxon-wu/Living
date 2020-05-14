@@ -58,7 +58,7 @@ const UserList: React.FC<IUserListProps> = ({ updateUserFromModel }) => {
     },
     {
       title: '收藏数',
-      dataIndex: 'bookmarksCount',
+      dataIndex: 'favoritesCount',
       sorter: true,
     },
     {

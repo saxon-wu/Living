@@ -5,7 +5,7 @@ volumes:
     external: true
   nginx:
     external: true
-  try-node_modules:
+  shared-node_modules:
     external: true
 
 services:
@@ -139,7 +139,7 @@ services:
       - TYPEORM_HOST=living-postgresql
     volumes:
       - ./nestjs:/app
-      - try-node_modules:/app/node_modules
+      - shared-node_modules:/app/node_modules
       # - $PWD/docker-data/npm/_libvips:/root/.npm/_libvips
     ports:
       - "3600:3600"

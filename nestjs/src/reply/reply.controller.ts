@@ -14,6 +14,7 @@ import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
 import { UserEntity } from '@src/user/user.entity';
 import { IReplyOutput } from './reply.interface';
+import { ReplyEntity } from './reply.entity';
 
 const MANY = 'replies';
 const ONE = 'reply';
@@ -27,12 +28,12 @@ export class ReplyController {
   async create(
     @Body() createReplyDTO: CreateReplyDTO,
     @User() user: UserEntity,
-  ): Promise<IReplyOutput> {
+  ): Promise<ReplyEntity> {
     return await this.replyService.create(createReplyDTO, user);
   }
 
   @UseGuards(AuthGuard)
-  @Delete(`${ONE}/:uuid`)
+  @Delete(`${ONE}/:id`)
   async softDelete(
     @Param() replyParamDTO: UUIDParamDTO,
     user: UserEntity,
@@ -41,7 +42,7 @@ export class ReplyController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(`${ONE}/:uuid`)
+  @Patch(`${ONE}/:id`)
   async softRestore(
     @Param() replyParamDTO: UUIDParamDTO,
     user: UserEntity,
@@ -50,11 +51,11 @@ export class ReplyController {
   }
 
   @UseGuards(AuthGuard)
-  @Post(`${ONE}/:uuid/like`)
+  @Post(`${ONE}/:id/like`)
   async like(
     @Param() replyParamDTO: UUIDParamDTO,
     @User() user: UserEntity,
-  ): Promise<IReplyOutput> {
+  ): Promise<ReplyEntity> {
     return await this.replyService.like(replyParamDTO, user);
   }
 }

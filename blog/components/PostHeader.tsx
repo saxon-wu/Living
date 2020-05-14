@@ -2,19 +2,19 @@ import Avatar from "./Avatar";
 import Date from "./Date";
 import PostTitle from "./PostTitle";
 import { DayTypeEnum } from "../lib/enum";
-import { AVATAR_SM } from "../lib/contants";
+import { AVATAR_SM, COVER_MD_HORIZONTAL } from "../lib/contants";
 import Link from "next/link";
 
 type Props = {
   title: string;
-  coverImage: string;
+  cover: { url: string };
   date: string;
   author: { id: string; username: string; avatar: any };
 };
 
 const PostHeader: React.FunctionComponent<Props> = ({
   title,
-  coverImage,
+  cover,
   date,
   author,
 }) => {
@@ -31,9 +31,9 @@ const PostHeader: React.FunctionComponent<Props> = ({
           </a>
         </Link>
       </div>
-      {coverImage && (
+      {cover && (
         <div className="mb-8 md:mb-16 -mx-5 sm:mx-0">
-          <img src={coverImage} alt="封面图" />
+          <img src={cover.url + COVER_MD_HORIZONTAL} alt="封面图" />
         </div>
       )}
       <div className="max-w-2xl mx-auto">

@@ -11,15 +11,15 @@ import {
 import { UserService } from './user.service';
 import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { UserEntity } from './user.entity';
 import { UpdateUserForAdminDTO } from './user.dto';
 
 const MANY = 'users';
 const ONE = 'user';
 
-  @UseGuards(AuthGuard)
-  @Controller('v1/admin')
+@UseGuards(AuthGuard)
+@Controller('v1/admin')
 export class AdminUserController {
   constructor(private readonly userService: UserService) {}
 
@@ -31,12 +31,15 @@ export class AdminUserController {
     // nestjs 7.0 自动转换number,bool未传时则为NaN,false
     if (isNaN(page)) page = 1;
     if (isNaN(limit)) limit = 10;
-    return await this.userService.findAll({ page, limit }, /* isAdminSide */true);
+    return await this.userService.findAll(
+      { page, limit },
+      /* isAdminSide */ true,
+    );
   }
 
   @Get(`${ONE}/:id`)
-  async findOne(@Param() paramDTO: IdParamDTO) {
-    return await this.userService.findOne(paramDTO, /* returnsEntity */true);
+  async findOne(@Param() paramDTO: UUIDParamDTO) {
+    return await this.userService.findOne(paramDTO);
   }
 
   @Delete(`${ONE}/destruct`)
@@ -47,13 +50,12 @@ export class AdminUserController {
   @Get(`${ONE}/whoami/x`)
   async whoami(@User() user: UserEntity) {
     const { id } = user;
-    return await this.userService.findOne({ id }, /* returnsEntity */ true);
+    return await this.userService.findOne({ id });
   }
 
-  
   @Put(`${ONE}/:id`)
   async update(
-    @Param() userParamDTO: IdParamDTO,
+    @Param() userParamDTO: UUIDParamDTO,
     @Body() userDTO: UpdateUserForAdminDTO,
     @User() user: UserEntity,
   ) {

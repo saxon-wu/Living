@@ -5,6 +5,8 @@ import {
   IsEnum,
   IsObject,
   IsBoolean,
+  IsUUID,
+  UUIDVersion,
 } from 'class-validator';
 import { ArticleStatusEnum } from './article.enum';
 import { IContent } from './article.interface';
@@ -21,6 +23,12 @@ export class CreateArticleDTO {
   @IsNotEmpty()
   @IsBoolean()
   isPublic: boolean;
+
+  @IsUUID(process.env.UUID_VERSION as UUIDVersion, {
+    message: '亲，无效的ID',
+  })
+  @IsOptional()
+  coverId?: string;
 }
 
 export class UpdateArticleDTO {

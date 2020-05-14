@@ -34,7 +34,7 @@ export class UserController {
     return await this.userService.findAll({ page, limit });
   }
 
-  @Get(`${ONE}/:uuid`)
+  @Get(`${ONE}/:id`)
   async findOne(@Param() paramDTO: UUIDParamDTO) {
     return await this.userService.findOne(paramDTO);
   }
@@ -59,8 +59,8 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get(`${ONE}/whoami/x`)
   async whoami(@User() user: UserEntity) {
-    const { uuid } = user;
-    return await this.userService.findOne({ uuid });
+    const { id } = user;
+    return await this.userService.findOne({ id });
   }
 
   @UseGuards(AuthGuard)

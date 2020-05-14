@@ -119,7 +119,7 @@ const Post: React.FunctionComponent<Props> = ({ post }) => {
                 <div className="w-full md:pr-12 mb-12">
                   <PostHeader
                     title={post.title}
-                    coverImage={post.coverImage}
+                    cover={post.cover}
                     date={post.createdAt}
                     author={post.publisher}
                   />

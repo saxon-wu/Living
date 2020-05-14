@@ -2,7 +2,7 @@ export interface IArticle {
   id: number;
   title: string;
   likesCount: number;
-  bookmarkArticlesCount: number;
+  favoriteArticlesCount: number;
   status: string;
   publisher: string;
   createdAt: Date;

@@ -5,4 +5,5 @@ export enum FileStatusEnum {
 
 export enum FilePurposeEnum {
   AVATAR = 'Avatar',
+  COVER = 'Cover',
 }

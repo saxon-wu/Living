@@ -4,11 +4,18 @@ import {
   ConflictException,
   InternalServerErrorException,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '@src/user/user.entity';
 import { Repository } from 'typeorm';
 import { LoginDTO } from './auth.dto';
+import { FileService } from '@src/file/file.service';
+import { NOT_FOUND_IMAGE } from '@src/shared/constant';
+import { FilePurposeEnum } from '@src/file/file.enum';
+import { IFileProperty } from '@src/file/file.interface';
+import { classToPlain } from 'class-transformer';
+import { UserStatusEnum } from '@src/user/user.enum';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +24,7 @@ export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly fileService: FileService,
   ) {}
 
   /**
@@ -29,13 +37,22 @@ export class AuthService {
    */
   async login(loginDTO: LoginDTO) {
     const { username, password } = loginDTO;
-    const user = await this.userRepository.findOne({ username }, {
-      relations: ['avatar']
-    });
+    const user = await this.userRepository.findOne(
+      { username },
+      {
+        relations: ['avatar'],
+      },
+    );
     if (!user || !user.comparePassword(password)) {
       throw new UnauthorizedException('亲，用户或密码不正确');
     }
-    return user.toResponseObject(false, true);
+
+    if (user.status !== UserStatusEnum.NORMAL) {
+      throw new ForbiddenException('亲，您的账号已被禁用');
+    }
+
+    const _user = classToPlain(user);
+    return { ..._user, ...user.tokenObject };
   }
 
   /**
@@ -58,10 +75,30 @@ export class AuthService {
     try {
       const savingUser = await this.userRepository.save(creatingUser);
 
-      return savingUser.toResponseObject(
-        /* isAdminSide */ false,
-        /* showToken */ true,
+      const fileProperty = <IFileProperty>(
+        await this.fileService.makePlaceholder(
+          username,
+          /*filename*/ null,
+          /*returnFileProperty*/ true,
+        )
       );
+
+      const avatar = await this.fileService.createSingleByFile(
+        { ...fileProperty, uploader: savingUser },
+        { purpose: FilePurposeEnum.AVATAR },
+        savingUser,
+      );
+      // 返回给用户
+      savingUser.avatar = avatar;
+
+      const updating = await this.userRepository.update(savingUser.id, {
+        avatar,
+      });
+      if (updating.affected) {
+        const _savingUser = classToPlain(savingUser);
+        return { ..._savingUser, ...savingUser.tokenObject };
+      }
+      return '随机默认头像关联失败，更新头像即可';
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');

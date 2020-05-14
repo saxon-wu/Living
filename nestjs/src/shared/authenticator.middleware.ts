@@ -26,19 +26,18 @@ export class AuthenticatorMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: Function) {
-
     const decode: any = this.validateRequest(req.headers.authorization);
     if (decode) {
       const idOrUUID = decode.id;
       let param: any = {};
       if (isUUID(idOrUUID, this.configService.get('UUID_VERSION'))) {
-        (param as UUIDParamDTO).uuid = idOrUUID;
+        (param as UUIDParamDTO).id = idOrUUID;
       } else {
         (param as IdParamDTO).id = idOrUUID;
       }
 
       // request.user是内部使用的，所以findOneByuuidForUser返回UserEntity类型更方便，比如关联存储
-      (<any>req).user = await this.userService.findOneForUser(param, true);
+      (<any>req).user = await this.userService.findOneForUser(param);
     }
     next();
   }

@@ -8,6 +8,7 @@ import {
   OneToOne,
   JoinColumn,
   RelationCount,
+  AfterLoad,
 } from 'typeorm';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
@@ -34,7 +35,7 @@ export class UserEntity extends SharedEntity {
   })
   username: string;
 
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
   @Column({
     type: 'varchar',
     length: 60,
@@ -75,16 +76,16 @@ export class UserEntity extends SharedEntity {
    */
   @ManyToMany(
     type => ArticleEntity,
-    article => article.bookmarkUsers,
+    article => article.favoriteUsers,
   )
   @JoinTable({
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'article_id', referencedColumnName: 'id' },
   })
-  bookmarks: ArticleEntity[];
+  favorites: ArticleEntity[];
 
-  @RelationCount((userEntity: UserEntity) => userEntity.bookmarks)
-  bookmarksCount: number;
+  @RelationCount((userEntity: UserEntity) => userEntity.favorites)
+  favoritesCount: number;
 
   /**
    * @description 用户属于点赞的(文章)
@@ -158,8 +159,8 @@ export class UserEntity extends SharedEntity {
    * @type {IAccessTokenOutput}
    * @memberof UserEntity
    */
-  private get tokenObject(): IAccessTokenOutput {
-    const { uuid, username } = this;
+  get tokenObject(): IAccessTokenOutput {
+    const { id, username } = this;
     // JWT_EXPIRATION_IN环境变量取到的是字符串，Eg: '60', "2 days", "10h", "7d", 其中字符串中是纯数字必须转成number类型，否则会报token过期
     let expiresIn: number | string = process.env.JWT_EXPIRATION_IN;
     if (!Number.isNaN(Number(expiresIn))) {
@@ -167,75 +168,12 @@ export class UserEntity extends SharedEntity {
       expiresIn = Number.parseInt(expiresIn, 10);
     }
     const accessToken: string = jwt.sign(
-      { id: uuid, username },
+      { id, username },
       process.env.JWT_SECRET_KEY,
       {
         expiresIn,
       },
     );
     return { accessToken, expiresIn };
-  }
-
-  /**
-   * @description 返回对象
-   * @author Saxon
-   * @date 2020-03-11
-   * @param {boolean} [isAdminSide=false]
-   * @param {boolean} [showToken=false]
-   * @returns
-   * @memberof UserEntity
-   */
-  toResponseObject(
-    isAdminSide: boolean = false,
-    showToken: boolean = false,
-  ): IUserOutput {
-    const {
-      id,
-      uuid,
-      username,
-      createdAt,
-      updatedAt,
-      articles,
-      bookmarks,
-      likeArticles,
-      tokenObject,
-      status,
-      avatar,
-      bookmarksCount,
-      articlesCount,
-      likeArticlesCount,
-    } = this;
-
-    const common = {
-      username,
-      avatar: avatar?.toResponseObject() || {
-        url: `${process.env.APP_URL_PREFIX}${
-          process.env.APP_PORT === '80'
-            ? ''
-            : `:${process.env.APP_PORT}/public/default.png`
-        }`,
-      },
-      bookmarks: bookmarks?.map(v => v.toResponseObject()) || null,
-      articles: articles?.map(v => v.toResponseObject()) || null,
-      likeArticles: likeArticles?.map(v => v.toResponseObject()) || null,
-      bookmarksCount,
-      articlesCount,
-      likeArticlesCount,
-    };
-    if (isAdminSide) {
-      return {
-        id,
-        uuid,
-        status,
-        createdAt,
-        updatedAt,
-        ...common,
-      };
-    }
-    const client = { id: uuid, ...common };
-    if (showToken) {
-      return { ...client, ...tokenObject };
-    }
-    return client;
   }
 }

@@ -16,7 +16,7 @@ import {
   UpdateArticleDTO,
   UpdateArticleDTOForAdmin,
 } from './article.dto';
-import { IdParamDTO } from '@src/shared/shared.dto';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import { AuthGuard } from '@src/shared/auth.guard';
 import { User } from '@src/shared/user.decorator';
 import { UserEntity } from '@src/user/user.entity';
@@ -41,13 +41,13 @@ export class AdminArticleController {
   }
 
   @Get(`${ONE}/:id`)
-  async findOne(@Param() paramDTO: IdParamDTO) {
+  async findOne(@Param() paramDTO: UUIDParamDTO) {
     return await this.articleService.findOne(paramDTO);
   }
 
   @Put(`${ONE}/:id`)
   async update(
-    @Param() articleParamDTO: IdParamDTO,
+    @Param() articleParamDTO: UUIDParamDTO,
     @Body() articleDTO: UpdateArticleDTOForAdmin,
     @User() user: UserEntity,
   ) {

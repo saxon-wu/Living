@@ -35,7 +35,7 @@ const Signin: React.FunctionComponent<Props> = () => {
       });
       _results = results;
     }
-    
+
     signIn({
       id: _results?.id,
       username: _results?.username,
@@ -122,7 +122,6 @@ const Signin: React.FunctionComponent<Props> = () => {
                         type={v.type}
                         className="absolute left-0 top-0 w-full h-full py-4 outline-none text-gray-900 text-lg px-3 py-2 bg-transparent"
                         required
-                        autoFocus={v.field === "username"}
                         onFocus={(e) => {
                           e.target.parentNode?.parentElement?.classList.add(
                             "Y-focus"
@@ -176,7 +175,7 @@ const Signin: React.FunctionComponent<Props> = () => {
                   className="Y-btn bg-gradient-r-primary-3 my-3 rounded-full flex items-center shadow px-4 py-2 text-white w-full justify-center text-lg"
                   type="submit"
                 >
-                 {signTypeState === SignType.SIGNIN ? "登录" : "注册"}
+                  {signTypeState === SignType.SIGNIN ? "登录" : "注册"}
                 </button>
               </form>
             </div>
@@ -200,7 +199,6 @@ const Signin: React.FunctionComponent<Props> = () => {
             var(--color-bg-secondary),
             var(--color-bg-primary)
           );
-
           transition: 0.4s;
         }
         .Y-input-div:before {

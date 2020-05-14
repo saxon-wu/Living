@@ -6,10 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { FileEntity } from './file.entity';
 import * as _ from 'lodash';
-import { IFileOutput } from './file.interface';
+import { IFileOutput, IFileProperty } from './file.interface';
 import {
   IPaginationOptions,
   Pagination,
@@ -28,11 +28,17 @@ import * as querystring from 'querystring';
 import { CreateFileDTO, FilenameParamDTO } from './file.dto';
 import { UserService } from '@src/user/user.service';
 import { FilePurposeEnum } from './file.enum';
-import { transformRelations } from '@src/shared/helper.util';
-import { UUIDParamDTO, IdParamDTO } from '@src/shared/shared.dto';
+import {
+  transformRelations,
+  randomRangeInteger,
+  filenameToUrl,
+} from '@src/shared/helper.util';
+import { UUIDParamDTO } from '@src/shared/shared.dto';
 import fetch from 'node-fetch';
 import { MulterConfigService } from '@src/shared/multer-config.service';
 import * as TextToSVG from 'text-to-svg';
+import * as svgGradient from 'svg-gradient';
+import * as randomColor from 'randomcolor';
 
 @Injectable()
 export class FileService {
@@ -52,17 +58,15 @@ export class FileService {
    * @description 依据id,uuid,filename查询一条数据，不存在则抛出404，公共调用
    * @author Saxon
    * @date 2020-05-03
-   * @param {(UUIDParamDTO | IdParamDTO | FilenameParamDTO)} paramDTO
-   * @param {boolean} [returnsEntity=false]
+   * @param {(UUIDParamDTO | FilenameParamDTO)} paramDTO
    * @param {(UserEntity | null)} [user]
-   * @returns {(Promise<FileEntity | IFileOutput>)}
+   * @returns {Promise<FileEntity>}
    * @memberof FileService
    */
   async findOneForFile(
-    paramDTO: UUIDParamDTO | IdParamDTO | FilenameParamDTO,
-    returnsEntity: boolean = false,
+    paramDTO: UUIDParamDTO | FilenameParamDTO,
     user?: UserEntity | null,
-  ): Promise<FileEntity | IFileOutput> {
+  ): Promise<FileEntity> {
     let file: FileEntity;
     if ((paramDTO as FilenameParamDTO).filename) {
       const { filename } = <FilenameParamDTO>paramDTO;
@@ -72,16 +76,8 @@ export class FileService {
           relations: this.relations,
         },
       );
-    } else if ((paramDTO as UUIDParamDTO).uuid) {
-      const { uuid } = <UUIDParamDTO>paramDTO;
-      file = await this.fileRepository.findOne(
-        { uuid },
-        {
-          relations: this.relations,
-        },
-      );
-    } else if ((paramDTO as IdParamDTO).id) {
-      const { id } = <IdParamDTO>paramDTO;
+    } else if ((paramDTO as UUIDParamDTO).id) {
+      const { id } = <UUIDParamDTO>paramDTO;
       file = await this.fileRepository.findOne(id, {
         relations: this.relations,
       });
@@ -93,56 +89,44 @@ export class FileService {
       throw new NotFoundException('文件不存在');
     }
 
-    if (returnsEntity) {
-      return file;
-    }
-    return file.toResponseObject();
+    return file;
   }
 
   /**
    * @description 查询一条 输出给客户端
    * @author Saxon
    * @date 2020-05-03
-   * @param {(UUIDParamDTO | IdParamDTO | FilenameParamDTO)} paramDTO
+   * @param {(UUIDParamDTO | FilenameParamDTO)} paramDTO
    * @param {(UserEntity | null)} [user]
-   * @returns {(Promise<FileEntity | IFileOutput>)}
+   * @returns {Promise<FileEntity>}
    * @memberof FileService
    */
   async findOne(
-    paramDTO: UUIDParamDTO | IdParamDTO | FilenameParamDTO,
+    paramDTO: UUIDParamDTO | FilenameParamDTO,
     user?: UserEntity | null,
-  ): Promise<FileEntity | IFileOutput> {
-    return await this.findOneForFile(paramDTO, /* returnsEntity */ false, user);
+  ): Promise<FileEntity> {
+    return await this.findOneForFile(paramDTO, user);
   }
 
   async findAll(
     options: IPaginationOptions,
     isAdminSide: boolean = false,
     user: UserEntity,
-  ): Promise<Pagination<IFileOutput>> {
+  ): Promise<Pagination<FileEntity>> {
     const queryBuilder = this.fileRepository.createQueryBuilder(this.table);
     queryBuilder.orderBy(`${this.table}.createdAt`, 'DESC');
     for (const item of transformRelations(this.table, this.relations)) {
       queryBuilder.leftJoinAndSelect(item.property, item.alias);
     }
     if (!isAdminSide) {
-      queryBuilder.where(`uploader.id = ${user.id}`);
+      queryBuilder.where(`${this.table}.uploader.id = :id`, { id: user.id });
     }
     const files: Pagination<FileEntity> = await paginate<FileEntity>(
       queryBuilder,
       options,
     );
 
-    if (isAdminSide) {
-      return {
-        ...files,
-        items: files.items.map(v => v.toResponseObject(/**isAdminSide */ true)),
-      };
-    }
-    return {
-      ...files,
-      items: files.items.map(v => v.toResponseObject()),
-    };
+    return files;
   }
 
   /**
@@ -158,7 +142,7 @@ export class FileService {
     files: any,
     fileDTO: CreateFileDTO,
     user: UserEntity,
-  ) {
+  ): Promise<FileEntity> {
     if (!files || isEmpty(files)) {
       throw new BadRequestException('亲，文件参数不正确');
     }
@@ -180,7 +164,11 @@ export class FileService {
       if (purpose === FilePurposeEnum.AVATAR) {
         await this.userService.updateAvatar(savingFile, user);
       }
-      return savingFile.toResponseObject();
+      // 去掉uploader，无需要
+      delete savingFile.uploader;
+      // save不会返回@AfterLoad的属性，这里需要手动添加
+      savingFile.url = filenameToUrl(savingFile.filename);
+      return savingFile;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -218,7 +206,7 @@ export class FileService {
 
       const creatingFile = this.fileRepository.create(newFiles);
       const savingFile = await this.fileRepository.save(creatingFile);
-      return savingFile.toResponseObject();
+      return savingFile;
     } catch (error) {
       this.logger.error(error);
       throw new NotFoundException('亲，文件不存在或已损坏');
@@ -250,7 +238,7 @@ export class FileService {
 
     try {
       const savingFile = await this.fileRepository.save(creatingFile);
-      return savingFile.map(v => v.toResponseObject());
+      return savingFile;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error.message, '服务器异常');
@@ -322,43 +310,102 @@ export class FileService {
    * @returns
    * @memberof FileService
    */
-  private async compositeImage(text: string, filename: string): Promise<string> {
-    const filePath = join(this.multerConfigService.filePath, filename);
+  private async compositeImage(
+    text: string,
+    filename?: string,
+    returnFileProperty?: boolean,
+  ): Promise<string | IFileProperty> {
+    const _filename = `generated-${this.multerConfigService.uniqueSuffix}`;
+    const filePath = join(
+      this.multerConfigService.filePath,
+      returnFileProperty ? _filename : filename,
+    );
 
     const isExists = fs.existsSync(filePath);
     try {
       if (!isExists) {
-        const roundedCorners = Buffer.from(
-          '<svg><rect x="0" y="0" width="200" height="200" rx="50" ry="50"/></svg>',
+        /* 生成灰度背景灰度文字或彩色渐变背景白色文字的图片*/
+        const svgOptions = {
+          x: 0,
+          y: 0,
+          fontSize: 48,
+          anchor: 'top',
+          attributes: { fill: returnFileProperty ? '#ffffff' : '#e2e8f0' },
+        };
+        const textToSVG = TextToSVG.loadSync(
+          join(__dirname, '..', '..', 'fonts/MSYH.otf'),
         );
-
-        const img = sharp({
+        const svg = textToSVG.getSVG(text, svgOptions);
+        const svgMetrics = textToSVG.getMetrics(text, svgOptions);
+        // 取宽高的最长的一边的N倍作为边长
+        const width =
+          (svgMetrics.width - svgMetrics.height > 0
+            ? svgMetrics.width
+            : svgMetrics.height) * 2;
+        const colorList = [
+          'red',
+          'orange',
+          'yellow',
+          'green',
+          'blue',
+          'purple',
+          'pink',
+        ];
+        //返回一个2-4种随机色的数组
+        var colors = randomColor({
+          count: randomRangeInteger(2, 4),
+          hue: colorList[randomRangeInteger(0, colorList.length)],
+        });
+        // 生成渐变SVG
+        const svgLinearGradient = svgGradient(
+          `linear-gradient(${randomRangeInteger(0, 359)}deg, ${colors.join(
+            ',',
+          )})`,
+        );
+        const index = svgLinearGradient.indexOf('>');
+        if (index === -1) {
+          throw new InternalServerErrorException('生成的SVG不标准');
+        }
+        // 渐变SVG本没有宽高，是最小的SVG，这里设置宽高
+        const svgLinearGradientWithWidth = `${svgLinearGradient.substr(
+          0,
+          index,
+        )} width='${width}' height='${width}' ${svgLinearGradient.substr(
+          index,
+        )}`;
+        let input: any = {
           create: {
             width: 400,
             height: 400,
             channels: 4,
             background: { r: 247, g: 250, b: 252 },
           },
-        });
-        if (text) {
-          const svgOptions = {
-            x: 0,
-            y: 0,
-            fontSize: 48,
-            anchor: 'top',
-            attributes: { fill: '#e2e8f0' },
-          };
-          const textToSVG = TextToSVG.loadSync(
-            join(__dirname, '..', '..', 'fonts/MSYH.otf'),
-          );
-          const svg = textToSVG.getSVG(text, svgOptions);
-          img.composite([
-            { input: Buffer.from(svg), gravity: sharp.gravity.center },
-          ]);
+        };
+        if (returnFileProperty) {
+          input = Buffer.from(svgLinearGradientWithWidth);
         }
+
+        const img = sharp(input);
+
+        img.composite([
+          { input: Buffer.from(svg), gravity: sharp.gravity.center },
+        ]);
+
         img.toFormat('jpg');
         await img.toFile(filePath);
       }
+      if (returnFileProperty) {
+        const stats = fs.statSync(filePath);
+        const storedMimeType = await fileType.fromFile(filePath);
+        const fileProperty = {
+          filename: _filename,
+          originalname: _filename,
+          size: stats.size,
+          mimetype: storedMimeType.mime,
+        };
+        return fileProperty;
+      }
+
       return filePath;
     } catch (error) {
       this.logger.error(error);
@@ -375,7 +422,11 @@ export class FileService {
    * @returns
    * @memberof FileService
    */
-  async makePlaceholder(text: string, filename: string): Promise<string> {
-    return await this.compositeImage(text, filename);
+  async makePlaceholder(
+    text: string,
+    filename?: string,
+    returnFileProperty?: boolean,
+  ): Promise<string | IFileProperty> {
+    return await this.compositeImage(text, filename, returnFileProperty);
   }
 }
