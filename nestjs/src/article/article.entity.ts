@@ -41,7 +41,10 @@ export class ArticleEntity extends SharedEntity {
   status: ArticleStatusEnum;
 
   @OneToOne(type => FileEntity)
-  @JoinColumn()
+  @JoinColumn({
+    name: 'cover_id',
+    referencedColumnName: 'id',
+  })
   cover: FileEntity;
 
   @Column({

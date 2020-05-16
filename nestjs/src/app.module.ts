@@ -26,14 +26,14 @@ import { FileModule } from './file/file.module';
           .get('TYPEORM_ENTITIES')
           .split(',')
           .map((v: string) => __dirname + v),
-        synchronize:
-          configService.get('NODE_ENV') === 'development' &&
-          configService.get('TYPEORM_SYNCHRONIZE') === 'true',
+        synchronize: configService.get('TYPEORM_SYNCHRONIZE') === 'true',
         logging: configService.get('TYPEORM_LOGGING') === 'true',
       }),
     }),
     ConfigModule.forRoot({
-      envFilePath: `.development.env`,
+      envFilePath: `../${
+        process.env.NODE_ENV === 'development' ? '.' + process.env.NODE_ENV : ''
+      }.env`,
       isGlobal: true,
     }),
     ArticleModule,

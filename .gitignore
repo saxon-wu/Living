@@ -104,5 +104,9 @@ dist
 # TernJS port file
 .tern-port
 
-#Minio config and data
+# Minio config and data
 docker-data/minio/
+
+# docker-compose file
+dev.yml
+server.yml

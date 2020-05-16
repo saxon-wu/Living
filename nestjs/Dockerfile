@@ -21,6 +21,7 @@ COPY ./sharp/1a2cac-sharp-v0.25.2-napi-v3-linuxmusl-x64.tar.gz /root/.npm/_prebu
 
 RUN npm config set registry https://registry.npm.taobao.org 
 RUN npm config set sharp_dist_base_url https://npm.taobao.org/mirrors/sharp-libvips/v8.9.1/
-RUN npm install -g @nestjs/cli
-RUN npm install --production
-
+RUN npm install -g @nestjs/cli@7.1.5
+RUN npm install
+# RUN mkdir uploads
+RUN npm run build

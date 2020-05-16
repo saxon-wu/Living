@@ -44,7 +44,10 @@ export class UserEntity extends SharedEntity {
   password: string;
 
   @OneToOne(type => FileEntity)
-  @JoinColumn()
+  @JoinColumn({
+    name: 'avatar_id',
+    referencedColumnName: 'id',
+  })
   avatar: FileEntity;
 
   @Column({
