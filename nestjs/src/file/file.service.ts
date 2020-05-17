@@ -23,7 +23,7 @@ import * as readChunk from 'read-chunk';
 import * as fileType from 'file-type';
 import * as fs from 'fs';
 import { Response } from 'express';
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 import * as querystring from 'querystring';
 import { CreateFileDTO, FilenameParamDTO } from './file.dto';
 import { UserService } from '@src/user/user.service';
@@ -38,7 +38,7 @@ import fetch from 'node-fetch';
 import { MulterConfigService } from '@src/shared/multer-config.service';
 import * as TextToSVG from 'text-to-svg';
 import * as svgGradient from 'svg-gradient';
-import * as randomColor from 'randomcolor';
+import randomColor from 'randomcolor';
 
 @Injectable()
 export class FileService {

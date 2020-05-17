@@ -5,8 +5,6 @@ volumes:
     external: true
   nginx:
     external: true
-  shared-node_modules:
-    external: true
 
 services:
   living-postgresql:
@@ -18,8 +16,8 @@ services:
       - POSTGRES_PASSWORD=${TYPEORM_PASSWORD}
       - POSTGRES_DB=${TYPEORM_DATABASE}
       - PGDATA=/var/lib/postgresql/data
-      - TZ=Asia/Shanghai # Set the time zone
-      - PGTZ=Asia/Shanghai # Set the time zone
+      - TZ=Asia/Shanghai # Set up the time zone
+      - PGTZ=Asia/Shanghai # Set up the time zone
     volumes:
       - postgresql-data:/var/lib/postgresql/data
       - $PWD/docker-data/etc/localtime:/etc/localtime:ro
@@ -45,12 +43,8 @@ services:
     env_file:
       - ./.env
     environment:
-      - NODE_ENV=development # Set the environment
+      - NODE_ENV=development # Set up the environment
       - TYPEORM_HOST=living-postgresql
-    volumes:
-      - ./nestjs:/app
-      - shared-node_modules:/app/node_modules
     ports:
       - "3600:3600"
     restart: on-failure
-    command: npm run start:dev # Set the running script

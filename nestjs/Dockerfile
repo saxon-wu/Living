@@ -2,10 +2,15 @@
 # FROM node:12.16.1-alpine3.9
 
 ## With python for sharp image
-FROM nikolaik/python-nodejs:python3.7-nodejs12-alpine
+FROM nikolaik/python-nodejs:python3.7-nodejs12-alpine AS builder
 
+## Create app directory
 WORKDIR /app
-COPY ./package*.json ./
+## A wildcard is used to ensure both package.json AND package-lock.json are copied
+# COPY ./package*.json ./
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY src ./src
 
 # RUN npm install pm2 -g
 # RUN npm ci
@@ -21,7 +26,18 @@ COPY ./sharp/1a2cac-sharp-v0.25.2-napi-v3-linuxmusl-x64.tar.gz /root/.npm/_prebu
 
 RUN npm config set registry https://registry.npm.taobao.org 
 RUN npm config set sharp_dist_base_url https://npm.taobao.org/mirrors/sharp-libvips/v8.9.1/
-RUN npm install -g @nestjs/cli@7.1.5
+
+# RUN npm install -g @nestjs/cli@7.1.5
+
+## Install app dependencies
 RUN npm install
-# RUN mkdir uploads
+
+## RUN mkdir uploads
 RUN npm run build
+
+
+FROM nikolaik/python-nodejs:python3.7-nodejs12-alpine
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+CMD [ "npm", "run", "start:prod" ]

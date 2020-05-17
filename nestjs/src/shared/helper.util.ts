@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import * as fs from 'fs';
 import { Type } from '@nestjs/common';
 
