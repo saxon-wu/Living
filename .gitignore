@@ -110,3 +110,7 @@ docker-data/minio/
 # docker-compose file
 dev.yml
 prod.yml
+
+# Bash script file
+dev.sh
+prod.sh

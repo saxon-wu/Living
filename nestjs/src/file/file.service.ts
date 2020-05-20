@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { FileEntity } from './file.entity';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { IFileOutput, IFileProperty } from './file.interface';
 import {
   IPaginationOptions,
@@ -19,12 +19,12 @@ import { UserEntity } from '@src/user/user.entity';
 import { isEmpty } from 'lodash';
 import { ConfigService } from '@nestjs/config';
 import { join, resolve } from 'path';
-import * as readChunk from 'read-chunk';
-import * as fileType from 'file-type';
-import * as fs from 'fs';
+import readChunk from 'read-chunk';
+import fileType from 'file-type';
+import fs from 'fs';
 import { Response } from 'express';
 import sharp from 'sharp';
-import * as querystring from 'querystring';
+import querystring from 'querystring';
 import { CreateFileDTO, FilenameParamDTO } from './file.dto';
 import { UserService } from '@src/user/user.service';
 import { FilePurposeEnum } from './file.enum';
@@ -36,8 +36,8 @@ import {
 import { UUIDParamDTO } from '@src/shared/shared.dto';
 import fetch from 'node-fetch';
 import { MulterConfigService } from '@src/shared/multer-config.service';
-import * as TextToSVG from 'text-to-svg';
-import * as svgGradient from 'svg-gradient';
+import TextToSVG from 'text-to-svg';
+import svgGradient from 'svg-gradient';
 import randomColor from 'randomcolor';
 
 @Injectable()
@@ -275,14 +275,16 @@ export class FileService {
       const transformFilePath = `${filePath}${
         isEmpty(options) ? '' : '#' + querystring.stringify(options)
       }`;
+      // const buffer = readChunk.sync(filePath, 0, 4100);
+      // const storedMimeType = await fileType.fromBuffer(buffer);
+        const storedMimeType = await fileType.fromFile(filePath);
+        let mime = storedMimeType.mime;
+      
       const isExists = fs.existsSync(transformFilePath);
       if (!isExists) {
-        // const buffer = readChunk.sync(filePath, 0, 4100);
-        // const storedMimeType = await fileType.fromBuffer(buffer);
         // const readStream = fs.createReadStream(filePath);
         const transform = sharp(filePath).resize(width, height);
 
-        // let mime = storedMimeType.mime;
         if (format) {
           transform.toFormat(format);
           // mime = transform.options.formatOut;
@@ -290,10 +292,10 @@ export class FileService {
         if (gaussblur) {
           transform.blur(Math.abs(~~gaussblur));
         }
-        // res.type(mime);
         await transform.toFile(transformFilePath);
         // readStream.pipe(transform).pipe(res);
       }
+      res.type(mime);
       fs.createReadStream(transformFilePath).pipe(res);
     } catch (error) {
       this.logger.error(error);

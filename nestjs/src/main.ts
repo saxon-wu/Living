@@ -94,6 +94,7 @@ async function bootstrap() {
 
   // 添加对BODY/ url编码的REST api的支持
   app.use(bodyParser.urlencoded({ extended: true, limit: '8mb' }));
+  // 413 Request Entity Too Large(params) OR Request Entity Too Large(params, files)
   app.use(bodyParser.json({ limit: '8mb' }));
 
   // 跨站点请求伪造（称为 CSRF 或 XSRF）
