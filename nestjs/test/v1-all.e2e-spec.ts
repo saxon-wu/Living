@@ -2,8 +2,8 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { AppModule } from '@src/app.module';
 import { INestApplication } from '@nestjs/common';
 import { Server } from 'http';
-import * as request from 'supertest';
-import * as faker from 'faker';
+import request from 'supertest';
+import faker from 'faker';
 
 describe('测试完整流程', () => {
   let app: INestApplication;
@@ -25,35 +25,33 @@ describe('测试完整流程', () => {
     await app.init();
   });
 
-  // describe('注册用户', () => {
-  //   /** TODO:注册时会自动生成头像，生成图片是异步的，与其它生成图片的任务重叠，导致生成图片指令方与接收方不一致，需要任务队列解决 */
-
-  //   // for (let i = 0; i < 10; i++) {
-  //   it(`/${API_VERSION}/auth/register (POST)`, async done => {
-  //     const username = faker.name.firstName()
-  //     const response = await request(server)
-  //       .post(`/${API_VERSION}/auth/register`)
-  //       .send({
-  //         username,
-  //         password,
-  //       })
-  //       .expect(201);
-  //     const register = response.body;
-  //     // expect(register).toMatchSnapshot({
-  //     //   id: expect.any(String),
-  //     //   username: expect.any(String),
-  //     //   accessToken: expect.any(String),
-  //     //   expiresIn: expect.any(Number),
-  //     // });
-  //     expect(register).toHaveProperty('id', expect.any(String));
-  //     expect(register).toHaveProperty('username', username);
-  //     expect(register).toHaveProperty('accessToken', expect.any(String));
-  //     expect(register).toHaveProperty('expiresIn', expect.any(Number));
-  //     accessToken = register.accessToken;
-  //     done();
-  //   });
-  //   // }
-  // });
+  describe('注册用户', () => {
+    for (let i = 0; i < 10; i++) {
+    it(`/${API_VERSION}/auth/register (POST)`, async done => {
+      const username = faker.name.firstName()
+      const response = await request(server)
+        .post(`/${API_VERSION}/auth/register`)
+        .send({
+          username,
+          password,
+        })
+        .expect(201);
+      const register = response.body;
+      // expect(register).toMatchSnapshot({ 
+      //   id: expect.any(String),
+      //   username: expect.any(String),
+      //   accessToken: expect.any(String),
+      //   expiresIn: expect.any(Number),
+      // });
+      expect(register).toHaveProperty('id', expect.any(String));
+      expect(register).toHaveProperty('username', username);
+      expect(register).toHaveProperty('accessToken', expect.any(String));
+      expect(register).toHaveProperty('expiresIn', expect.any(Number));
+      accessToken = register.accessToken;
+      done();
+    });
+    }
+  });
 
   describe('获取所有用户', () => {
     it(`/${API_VERSION}/users (GET)`, async done => {

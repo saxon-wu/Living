@@ -156,15 +156,8 @@ export class ArticleService {
           const file = await this.fileService.findOneForFile({ id });
           filename = file.filename;
         }
-        // (v.data as any).file.url = `${process.env.APP_URL_PREFIX}${
-        //   process.env.APP_PORT === '80' ? '' : `:${process.env.APP_PORT}`
-        // }/api/v1/file/image/${filename}`;
       }
     }
-
-    // if (returnsEntity) {
-    //   return article;
-    // }
     return article;
   }
 

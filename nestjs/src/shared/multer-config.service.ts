@@ -14,13 +14,15 @@ export class MulterConfigService implements MulterOptionsFactory {
     'image/jpeg': 'jpg',
     'image/jpg': 'jpg',
   };
-  public uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-  public filePath = join(
+  public uniqueSuffix = (): string =>
+    `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  public filePath: string = join(
     __dirname,
     '..',
     '..',
     this.configService.get('STORAGE_DISK_PATH'),
   );
+  
   constructor(private readonly configService: ConfigService) {}
 
   /**
@@ -54,7 +56,7 @@ export class MulterConfigService implements MulterOptionsFactory {
            */
 
           const ext = this.MIME_TYPE_MAP[file.mimetype];
-          cb(null, `${file.fieldname}-${this.uniqueSuffix}`);
+          cb(null, `${file.fieldname}-${this.uniqueSuffix()}`);
         },
       }),
       fileFilter: (req, file, cb) => {

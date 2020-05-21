@@ -8,7 +8,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { FileEntity } from './file.entity';
-import _ from 'lodash';
 import { IFileOutput, IFileProperty } from './file.interface';
 import {
   IPaginationOptions,
@@ -16,7 +15,7 @@ import {
   paginate,
 } from 'nestjs-typeorm-paginate';
 import { UserEntity } from '@src/user/user.entity';
-import { isEmpty } from 'lodash';
+import { isEmpty, random } from 'lodash';
 import { ConfigService } from '@nestjs/config';
 import { join, resolve } from 'path';
 import readChunk from 'read-chunk';
@@ -30,7 +29,6 @@ import { UserService } from '@src/user/user.service';
 import { FilePurposeEnum } from './file.enum';
 import {
   transformRelations,
-  randomRangeInteger,
   filenameToUrl,
 } from '@src/shared/helper.util';
 import { UUIDParamDTO } from '@src/shared/shared.dto';
@@ -180,7 +178,7 @@ export class FileService {
     if (!url) {
       throw new BadRequestException('亲，传入的参数不正确');
     }
-    const filename = `network-${this.multerConfigService.uniqueSuffix}`;
+    const filename = `network-${this.multerConfigService.uniqueSuffix()}`;
     const filePath = join(this.multerConfigService.filePath, filename);
     try {
       const res = await fetch(url);
@@ -317,7 +315,7 @@ export class FileService {
     filename?: string,
     returnFileProperty?: boolean,
   ): Promise<string | IFileProperty> {
-    const _filename = `generated-${this.multerConfigService.uniqueSuffix}`;
+    const _filename = `generated-${this.multerConfigService.uniqueSuffix()}`;
     const filePath = join(
       this.multerConfigService.filePath,
       returnFileProperty ? _filename : filename,
@@ -355,12 +353,12 @@ export class FileService {
         ];
         //返回一个2-4种随机色的数组
         var colors = randomColor({
-          count: randomRangeInteger(2, 4),
-          hue: colorList[randomRangeInteger(0, colorList.length)],
+          count: random(2, 4),
+          hue: colorList[random(0, colorList.length)],
         });
         // 生成渐变SVG
         const svgLinearGradient = svgGradient(
-          `linear-gradient(${randomRangeInteger(0, 359)}deg, ${colors.join(
+          `linear-gradient(${random(0, 359)}deg, ${colors.join(
             ',',
           )})`,
         );

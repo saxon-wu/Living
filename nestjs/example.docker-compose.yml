@@ -1,0 +1,86 @@
+version: '3.7'
+
+volumes:
+  postgresql-data:
+    external: true
+  nginx:
+    external: true
+  shared-node_modules:
+    external: true
+  redis-data:
+    external: true
+
+networks:
+  living_network:
+    driver: bridge
+
+services:
+  living-postgresql:
+    image: postgres:12.2-alpine
+    container_name: living-postgresql
+    restart: on-failure
+    networks:
+      - living_network
+    environment:
+      - POSTGRES_USER=${TYPEORM_USERNAME}
+      - POSTGRES_DB=${TYPEORM_DATABASE}
+      - POSTGRES_PASSWORD=${TYPEORM_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data
+      - TZ=Asia/Shanghai
+      - PGTZ=Asia/Shanghai
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+      - $PWD/docker-data/etc/localtime:/etc/localtime:ro
+    ports:
+      - '${TYPEORM_PORT}:5432'
+
+  living-adminer:
+    image: adminer
+    container_name: living-adminer
+    restart: on-failure
+    networks:
+      - living_network
+    environment:
+      ADMINER_DEFAULT_SERVER: living-postgresql
+    depends_on:
+      - living-postgresql
+    ports:
+      - '8080:8080'
+
+  living-nestjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: living-nestjs
+    env_file:
+      - ./.development.env
+    restart: on-failure
+    networks:
+      - living_network
+    environment:
+      - NODE_ENV=development
+      - TYPEORM_HOST=living-postgresql
+      - REDIS_HOST=living-redis
+      - REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+      - ./scripts:/app/scripts
+      - shared-node_modules:/app/node_modules
+    depends_on:
+      - living-postgresql
+      - living-redis
+    ports:
+      - '${API_PORT}:${API_PORT}'
+
+  living-redis:
+    image: redis:6.0.2-alpine
+    container_name: living-redis
+    restart: on-failure
+    networks:
+      - living_network
+    volumes:
+      - redis-data:/data
+    entrypoint: redis-server --appendonly yes
+    ports:
+      - ${REDIS_PORT}:6379

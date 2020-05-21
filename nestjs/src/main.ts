@@ -14,7 +14,7 @@ import { noop } from 'rxjs';
 import { setupMorgan } from './morgan';
 import * as csurf from 'csurf';
 
-const PORT = process.env.APP_PORT || 3000;
+const PORT = process.env.API_PORT || 3000;
 const PREFIX = process.env.API_PREFIX || 'api';
 
 async function bootstrap() {

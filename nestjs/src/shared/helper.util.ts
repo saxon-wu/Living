@@ -4,19 +4,6 @@ import * as fs from 'fs';
 import { Type } from '@nestjs/common';
 
 /**
- * @description 生成随机区间整数
- * @author Saxon
- * @date 2020-02-18
- * @export
- * @param {number} n
- * @param {number} m
- * @returns {number}
- */
-export function randomRangeInteger(n: number, m: number): number {
-  return Math.floor(Math.random() * (m - n + 1) + 1);
-}
-
-/**
  * @description 转为大写下划线拼接
  * @author Saxon
  * @date 2020-02-18
