@@ -27,4 +27,4 @@ RUN npm config set sharp_dist_base_url https://npm.taobao.org/mirrors/sharp-libv
 
 RUN npm install -g @nestjs/cli@7.1.5
 
-CMD scripts/docker-deploy.sh;
+ENTRYPOINT ["sh", "scripts/docker-entrypoint.sh"]

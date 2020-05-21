@@ -206,5 +206,5 @@ export function transformRelations(tableName: string, relations: string[]) {
  * @returns
  */
 export function filenameToUrl(filename: string) {
-  return `${process.env.APP_IMAGE_URL_PREFIX}/api/v1/file/image/${filename}`;
+  return `${process.env.API_IMAGE_URL_PREFIX}/api/v1/file/image/${filename}`;
 }
