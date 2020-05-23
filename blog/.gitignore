@@ -2,5 +2,5 @@ node_modules
 .next
 
 .env
-.env.development
+.development.env
 .now

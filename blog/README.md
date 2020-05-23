@@ -4,7 +4,7 @@ So far we have implemented: Signin, Signup, Post lists, Show a post, Create a po
 
 ## Demo (TODO)
 
-[https://coming-soon.now.sh/](https://coming-soon.now.sh/)
+[https://coming-soon.now.sh/](https://living-blog.now.sh)
 
 ### Related libraries
 

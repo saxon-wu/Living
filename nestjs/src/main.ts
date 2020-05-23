@@ -1,26 +1,44 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, HttpStatus } from '@nestjs/common';
+import {
+  ValidationPipe,
+  HttpStatus,
+  NestApplicationOptions,
+} from '@nestjs/common';
 import { HttpExceptionFilter } from './shared/http-exception.filter';
 import { TransformInterceptor } from './shared/transform.interceptor';
 import rateLimit from 'express-rate-limit';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import * as helmet from 'helmet';
+import helmet from 'helmet';
 import compression from 'compression';
 import DDOS from 'ddos';
-import * as bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 import { noop } from 'rxjs';
 import { setupMorgan } from './morgan';
-import * as csurf from 'csurf';
+import csurf from 'csurf';
+import fs from 'fs';
 
 const PORT = process.env.API_PORT || 3000;
 const PREFIX = process.env.API_PREFIX || 'api';
+const API_URL_PREFIX = process.env.API_URL_PREFIX || 'localhost';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+const nestApplicationOptions: NestApplicationOptions = {};
+if (API_URL_PREFIX.includes('https')) {
+  const secretsDir = join(__dirname, '..', 'secrets');
+  const httpsOptions = {
+    key: fs.readFileSync(`${secretsDir}/living.key`),
+    cert: fs.readFileSync(`${secretsDir}/living.crt`),
+  };
+  nestApplicationOptions.httpsOptions = httpsOptions;
+}
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule,
+    nestApplicationOptions,
+  );
 
   // 允许跨域资源共享 端口80不可为 http:xxx:80
   app.enableCors({
@@ -29,6 +47,7 @@ async function bootstrap() {
       'http://localhost:8001',
       'http://localhost',
       'http://localhost:3000',
+      'https://living-blog.now.sh',
     ],
   });
 
@@ -76,7 +95,7 @@ async function bootstrap() {
   app.use(compression());
 
   // 应用层DDOS保护
-  const ddos = new DDOS({ burst: 10, limit: 15 });
+  const ddos = new DDOS({ burst: 100, limit: 150 });
   isDevelopment ? noop() : app.use(ddos.express);
 
   // 拒绝已知的REST API漏洞
@@ -109,6 +128,6 @@ async function bootstrap() {
 
   await app
     .listen(PORT)
-    .then(() => console.log(`Server starting on http://localhost:${PORT}`));
+    .then(() => console.log(`Server starting on ${API_URL_PREFIX}:${PORT}`));
 }
 bootstrap();

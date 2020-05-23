@@ -35,3 +35,6 @@ lerna-debug.log*
 
 # upload
 /uploads
+
+# ssl key
+/secrets
