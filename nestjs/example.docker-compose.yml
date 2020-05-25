@@ -33,6 +33,7 @@ services:
       - $PWD/docker-data/etc/localtime:/etc/localtime:ro
     ports:
       - '${TYPEORM_PORT}:5432'
+    command: -p ${TYPEORM_PORT}
 
   living-adminer:
     image: adminer
@@ -41,7 +42,7 @@ services:
     networks:
       - living_network
     environment:
-      ADMINER_DEFAULT_SERVER: living-postgresql
+      ADMINER_DEFAULT_SERVER: Hello
     depends_on:
       - living-postgresql
     ports:
