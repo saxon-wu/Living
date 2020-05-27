@@ -26,7 +26,7 @@ import {
 } from 'nestjs-typeorm-paginate';
 import { ArticleStatusEnum } from './article.enum';
 import { IUserOutput } from '@src/user/user.interface';
-import { transformRelations } from '@src/shared/helper.util';
+import { transformRelations, filenameToUrl } from '@src/shared/helper.util';
 import { FileService } from '@src/file/file.service';
 import { NOT_FOUND_IMAGE } from '@src/shared/constant';
 import { IFileProperty } from '@src/file/file.interface';
@@ -156,6 +156,7 @@ export class ArticleService {
           const file = await this.fileService.findOneForFile({ id });
           filename = file.filename;
         }
+        (v.data as any).file.url = filenameToUrl(filename);
       }
     }
     return article;
