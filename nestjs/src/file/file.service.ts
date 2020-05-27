@@ -204,6 +204,10 @@ export class FileService {
 
       const creatingFile = this.fileRepository.create(newFiles);
       const savingFile = await this.fileRepository.save(creatingFile);
+      // 去掉uploader，无需要
+      delete savingFile.uploader;
+      // save不会返回@AfterLoad的属性，这里需要手动添加
+      savingFile.url = filenameToUrl(savingFile.filename);
       return savingFile;
     } catch (error) {
       this.logger.error(error);
