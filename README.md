@@ -3,7 +3,7 @@
 > ### [Living](https://github.com/saxon-wu/Living) is a full-stack TypeScript solution, and example.
 #### 😃Server side: NestJS + Typeorm + PostgreSQL + ant-design-pro
 #### 😃Client side: Next.js + TailwindCSS
-#### 😃Mobile side: React Native
+#### 😃Mobile side: React Native(Todo)
 
 ----------
 

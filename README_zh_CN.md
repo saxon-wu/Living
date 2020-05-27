@@ -3,7 +3,7 @@
 > ### [Living](https://github.com/saxon-wu/Living) 是一个全栈的解决方案,和示例。
 #### 😃服务端: NestJS + Typeorm + PostgreSQL + ant-design-pro
 #### 😃客户端: Next.js + TailwindCSS
-#### 😃移动端: React Native
+#### 😃移动端: React Native(待实现)
 
 ----------
 
