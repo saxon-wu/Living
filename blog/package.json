@@ -23,7 +23,7 @@
     "react-dom": "^16.13.1",
     "react-toastify": "^5.5.0",
     "remark": "11.0.2",
-    "remark-html": "10.0.0",
+    "remark-html": "13.0.2",
     "store2": "^2.11.1",
     "umi-request": "^1.2.19",
     "universal-cookie": "^4.0.3"
