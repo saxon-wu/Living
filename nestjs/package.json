@@ -52,7 +52,7 @@
     "rimraf": "^3.0.2",
     "rotating-file-stream": "^2.1.0",
     "rxjs": "^6.5.4",
-    "sharp": "^0.25.2",
+    "sharp": "^0.30.5",
     "svg-gradient": "^1.0.2",
     "text-to-svg": "^3.1.5",
     "typeorm": "^0.2.24"
