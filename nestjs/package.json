@@ -37,7 +37,7 @@
     "dayjs": "^1.8.23",
     "ddos": "^0.2.1",
     "express-rate-limit": "^5.1.1",
-    "file-type": "^14.2.0",
+    "file-type": "^16.5.4",
     "hashids": "^2.2.1",
     "helmet": "^3.22.0",
     "jsonwebtoken": "^8.5.1",
